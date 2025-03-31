@@ -1,22 +1,33 @@
-const express = require(`express`);
-
-const UserController = require("../controllers/usersController");
-
+const express = require('express');
+const UserController = require('../controllers/usersController');
 const router = express.Router();
+const { validateUser, validationUserId } = require('../validators/usersDTO');
 
-router.post('/register', UserController.registerUser);
-router.post('/create/', UserController.createUser);
-router.post('/authenticate', UserController.authenticate);
+// Register user
+router.post('/register', validateUser, UserController.registerUser);
 
-router.put('/update/:id', UserController.updateUser);
+// Authenticate user
+router.post('/authenticate', validateUser, UserController.authenticate);
 
+// Update user
+router.put('/update/:id', validationUserId, validateUser, UserController.updateUser);
+
+// Get all users
 router.get('/', UserController.getAllUsers);
-router.get('/user/:id', UserController.getUserById);
-router.get('/user/name/:name', UserController.getUserByName);
-router.get('/user/email/:email', UserController.getUserByEmail);
-router.get('/user/created/:date', UserController.getUserByAccountCreationDate);
-router.get('/user/exists/:name', UserController.userExists);
 
-router.delete('/user/:id', UserController.deleteUser);
+// Get user by ID
+router.get('/:id', validationUserId, UserController.getUserById);  
+
+// Get user by name
+router.get('/name/:name', UserController.getUserByName); 
+
+// Get user by email
+router.get('/email/:email', UserController.getUserByEmail);  
+
+// Get users by account creation date
+router.get('/created/:date', UserController.getUserByAccountCreationDate); 
+
+// Delete user by ID
+router.delete('/delete/:id', validationUserId, UserController.deleteUser);  
 
 module.exports = router;

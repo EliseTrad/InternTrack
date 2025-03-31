@@ -1,37 +1,28 @@
-const UsersRepository = require("../repositories/usersRepository");
-const UserRepository = require("../repositories/usersRepository");
+const UsersRepository = require('../repositories/usersRepository');
 
 class UserService {
     // create a new user
-    static async createUser(name, email, password, profile_picture = null,
-        account_created_date = new Date()) {
+    static async createUser({ name, email, password, profile_picture = null, 
+                                account_created_date = new Date() }) {
         try {
-            return await UserRepository.createUser(name, email, password, profile_picture,
-                account_created_date);
+            // passing an object to the repository method
+            return await UsersRepository.createUser({ name, email, password, profile_picture, 
+                                                    account_created_date });
         } catch (error) {
             throw new Error('Unable to create user. Please try again later.');
         }
     }
 
-    // check if the user exists
-    static async userExists(name) {
-        try {
-            return await UsersRepository.userExists(name);
-        } catch (error) {
-            throw new Error('Unable to check if user exists. Please try again later.');
-        }
-    }
-
     // update user by id
-    static async updateUser(id, name, email, password = null, profile_picture = null) {
+    static async updateUser(id, { name, email, password = null, profile_picture = null }) {
         try {
-            return await UsersRepository.updateUser(id, name, email, password, profile_picture);
+            return await UsersRepository.updateUser(id, { name, email, password, profile_picture });
         } catch (error) {
             throw new Error('Unable to update user details. Please try again later.');
         }
     }
 
-    // read all user
+    // read all users
     static async getAllUsers() {
         try {
             return await UsersRepository.getAllUsers();
@@ -58,7 +49,7 @@ class UserService {
         }
     }
 
-    // read user by name
+    // read user by email
     static async getUserByEmail(email) {
         try {
             return await UsersRepository.getUserByEmail(email);
@@ -67,10 +58,10 @@ class UserService {
         }
     }
 
-    // read user by date
+    // read users by account creation date
     static async getUserByAccountCreationDate(date) {
         try {
-            return await UsersRepository.getUserByAccountCreationDate(date);
+            return await UsersRepository.getUsersByAccountCreationDate(date);
         } catch (error) {
             throw new Error('Unable to fetch users by account creation date. Please try again later.');
         }
@@ -94,10 +85,10 @@ class UserService {
         }
     }
 
-    // register new user
-    static async registerUser(name, email, password, profile_picture = null) {
+    // register new user 
+    static async registerUser({ name, email, password, profile_picture = null }) {
         try {
-            return await UsersRepository.createUser(name, email, password, profile_picture);
+            return await UsersRepository.createUser({ name, email, password, profile_picture });
         } catch (error) {
             throw new Error('Unable to register user. Please try again later.');
         }

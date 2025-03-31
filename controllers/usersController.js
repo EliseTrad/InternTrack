@@ -5,35 +5,21 @@ class UserController {
     static async createUser(req, res) {
         try {
             const { name, email, password, account_created_date, profile_picture } = req.body;
-            const result = await UserService.createUserrUser(name, email, password, account_created_date,
-                profile_picture);
+            const result = await UserService.createUser({
+                name, email, password, account_created_date, profile_picture
+            });
             res.status(201).json({ message: 'User created successfully', result });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     }
 
-    static async userExists(req, res) {
-        try {
-          const { name } = req.params;
-          const userExists = await UserService.userExists(name);
-    
-          if (userExists) {
-            return res.status(200).json({ message: 'User exists' });
-          } else {
-            return res.status(404).json({ message: 'User does not exist' });
-          }
-        } catch (error) {
-          res.status(500).json({ message: error.message });
-        }
-    }
-
     static async registerUser(req, res) {
         try {
-            const { name, email, password, account_created_date,
-                profile_picture } = req.body;
-            const result = await UserService.registerUser(name, email, password, account_created_date,
-                profile_picture);
+            const { name, email, password, account_created_date, profile_picture } = req.body;
+            const result = await UserService.registerUser({
+                name, email, password, account_created_date, profile_picture
+            });
             res.status(201).json({ message: 'User registered successfully', result });
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -44,7 +30,7 @@ class UserController {
         try {
             const { id } = req.params;
             const { name, email, password, profile_picture } = req.body;
-            const result = await UserService.updateUser(id, name, email, password, profile_picture);
+            const result = await UserService.updateUser(id, { name, email, password, profile_picture });
             res.status(200).json({ message: 'User updated successfully', result });
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -104,7 +90,7 @@ class UserController {
             const { date } = req.params;
             const users = await UserService.getUserByAccountCreationDate(date);
             if (!users || users.length === 0) {
-                return res.status(404).json({ message: 'No users found' });
+                return res.status(404).json({ message: 'No users found for this date' });
             }
             res.status(200).json(users);
         } catch (error) {
@@ -116,6 +102,9 @@ class UserController {
         try {
             const { name, password } = req.body;
             const user = await UserService.authenticate(name, password);
+            if (!user) {
+                return res.status(401).json({ message: 'Invalid credentials' });
+            }
             res.status(200).json(user);
         } catch (error) {
             res.status(500).json({ message: error.message });
