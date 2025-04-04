@@ -255,6 +255,27 @@ class ApplicationsRepository {
         }
     }
 
+    /**
+    * Counts the number of applications for user.
+    * @param {number} id - id of the user
+    * @returns {Promise<Object>} - the count of applications for that user.
+    * @throws {Error} If there is an issue fetching the application count.
+    */
+    static async countApplicationsByUserId(id) {
+        try {
+            // Count the number of applications grouped by user_id
+            const result = await Application.count({
+                where: { used_id: id },
+                group: ['user_id'],
+            });
+
+            return result;
+        } catch (error) {
+            console.error("Error counting applications:", error);
+            throw new Error("Unable to count applications by user ID.");
+        }
+    }
+
 }
 
 module.exports = ApplicationsRepository;

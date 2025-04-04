@@ -5,18 +5,22 @@ const { validateCoverLetter, validationCoverLetterId } = require('../validators/
 const { validationUserId } = require('../validators/usersDTO');
 
 // Create a cover letter
-router.post('/create', validateCoverLetter, validationUserId, CoverLettersController.createCoverLetter);
+router.post('/create', validateCoverLetter, validationUserId, 
+    (req, res) => CoverLettersController.createCoverLetter(req, res));
 
 // Get all cover letters
-router.get('/', CoverLettersController.getAllCoverLetters);
+router.get('/', (req, res) => CoverLettersController.getAllCoverLetters(req, res));
 
 // Get cover letter(s) by user id
-router.get('/user/:id', validationUserId, CoverLettersController.getCoverLettersByUserId);
+router.get('/user/:id', validationUserId, (req, res) => 
+    CoverLettersController.getCoverLettersByUserId(req, res));
 
 // Get cover letter by id
-router.get('/:id', validationCoverLetterId, CoverLettersController.getCoverLetterById);
+router.get('/:id', validationCoverLetterId, (req, res) => 
+    CoverLettersController.getCoverLetterById(req, res));
 
 // Delete a cover letter by id
-router.delete('/delete/:id', validationCoverLetterId, CoverLettersController.deleteCoverLetter);
+router.delete('/delete/:id', validationCoverLetterId, 
+    (req, res) => CoverLettersController.deleteCoverLetter(req, res));
 
 module.exports = router;

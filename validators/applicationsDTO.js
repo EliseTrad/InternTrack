@@ -52,6 +52,14 @@ const validateApplication = [
         .optional()
         .isInt()
         .withMessage("Cover letter ID must be an integer."),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(404).json({ errors: errors.array() });
+        }
+        next();
+    }
 ];
 
 const validationApplicationId = [
@@ -63,6 +71,7 @@ const validationApplicationId = [
                 throw new Error("Application ID does not exist.");
             }
         }),
+
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

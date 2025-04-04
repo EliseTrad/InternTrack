@@ -2,7 +2,7 @@ const express = require('express');
 const InterviewController = require('../controllers/interviewsController');
 const router = express.Router();
 const { validateInterview, validationInterviewId } = require('../validators/interviewsDTO');
-const validationApplicationId = require('../validators/applicationsDTO');
+const { validationApplicationId } = require('../validators/applicationsDTO');
 
 // createInterview
 router.post('/create', validateInterview, validationApplicationId, InterviewController.createInterview);

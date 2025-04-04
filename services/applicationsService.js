@@ -2,7 +2,7 @@ const ApplicationsRepository = require('../repositories/applicationsRepository')
 
 class ApplicationsService {
     // Create a new application
-    async createApplication({ company_name, position_title, application_date, status,
+    static async createApplication({ company_name, position_title, application_date, status,
         deadline, notes, application_source, user_id, resume_id, cover_letter_id }) {
         try {
             return await ApplicationsRepository.createApplication({
@@ -17,7 +17,7 @@ class ApplicationsService {
     }
 
     // Update an application by ID
-    async updateApplication(id, updatedFields) {
+    static async updateApplication(id, updatedFields) {
         try {
             return await ApplicationsRepository.updateApplication(id, updatedFields);
         } catch (error) {
@@ -26,7 +26,7 @@ class ApplicationsService {
     }
 
     // Get all applications
-    async getAllApplications() {
+    static async getAllApplications() {
         try {
             return await ApplicationsRepository.getAllApplications();
         } catch (error) {
@@ -35,7 +35,7 @@ class ApplicationsService {
     }
 
     // Get an application by ID
-    async getApplicationById(id) {
+    static async getApplicationById(id) {
         try {
             return await ApplicationsRepository.getApplicationById(id);
         } catch (error) {
@@ -45,7 +45,7 @@ class ApplicationsService {
     }
 
     // Get applications by user ID
-    async getApplicationsByUserId(id) {
+    static async getApplicationsByUserId(id) {
         try {
             return await ApplicationsRepository.getApplicationsByUserId(id);
         } catch (error) {
@@ -55,7 +55,7 @@ class ApplicationsService {
     }
 
     // Get applications by company name
-    async getApplicationsByCompanyName(name) {
+    static async getApplicationsByCompanyName(name) {
         try {
             return await ApplicationsRepository.getApplicationsByCompanyName(name);
         } catch (error) {
@@ -65,7 +65,7 @@ class ApplicationsService {
     }
 
     // Get applications by position title
-    async getApplicationsByPositionTitle(title) {
+    static async getApplicationsByPositionTitle(title) {
         try {
             return await ApplicationsRepository.getApplicationsByPositionTitle(title);
         } catch (error) {
@@ -75,7 +75,7 @@ class ApplicationsService {
     }
 
     // Get applications by status
-    async getApplicationsByStatus(status) {
+    static async getApplicationsByStatus(status) {
         try {
             return await ApplicationsRepository.getApplicationsByStatus(status);
         } catch (error) {
@@ -85,7 +85,7 @@ class ApplicationsService {
     }
 
     // Get applications by deadline
-    async getApplicationsByDeadline(deadline) {
+    static async getApplicationsByDeadline(deadline) {
         try {
             return await ApplicationsRepository.getApplicationsByDate(deadline);
         } catch (error) {
@@ -105,7 +105,7 @@ class ApplicationsService {
     }
 
     // Delete an application by ID
-    async deleteApplicationById(id) {
+    static async deleteApplicationById(id) {
         try {
             return await ApplicationsRepository.deleteApplicationById(id);
         } catch (error) {
@@ -125,7 +125,7 @@ class ApplicationsService {
     }
 
     // Get applications by cover letter ID
-    async getApplicationsByCoverLetterId(id) {
+    static async getApplicationsByCoverLetterId(id) {
         try {
             return await ApplicationsRepository.getApplicationsByCoverLetterId(id);
         } catch (error) {
@@ -135,11 +135,20 @@ class ApplicationsService {
     }
 
     // Count applications by status
-    async countApplicationsByStatuses(statuses) {
+    static async countApplicationsByStatuses(statuses) {
         try {
             return await ApplicationsRepository.countApplicationsByStatuses(statuses);
         } catch (error) {
             throw new Error('Unable to count applications by status.')
+        }
+    }
+
+    // Count applications by user ID
+    static async countApplicationsByUserId(id) {
+        try {
+            return await ApplicationsRepository.countApplicationsByStatuses(id);
+        } catch (error) {
+            throw new Error('Unable to count applications by user ID.')
         }
     }
 }

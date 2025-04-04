@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Sequelize } = require('sequelize');
 const sequelize = require('../config/db-sequelize');
 const moment = require('moment');
 
@@ -10,7 +10,6 @@ Resume.init(
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
-            allowNull: false
         },
         resume_file_path: {
             type: DataTypes.STRING,
@@ -21,16 +20,20 @@ Resume.init(
             allowNull: false
         },
         resume_upload_date: {
-            type: DataTypes.DATEONLY,
+            type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW, // Set the current date
+            defaultValue: Sequelize.NOW,
             get() {
                 return moment(this.getDataValue('resume_upload_date')).format('YYYY-MM-DD');
             }
         },
         user_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'user_id'
+            }
         }
     }, {
     sequelize,

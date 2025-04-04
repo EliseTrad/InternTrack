@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Sequelize } = require('sequelize');
 const sequelize = require('../config/db-sequelize');
 const moment = require('moment');
 
@@ -21,16 +21,20 @@ CoverLetter.init(
             allowNull: false
         },
         cover_upload_date: {
-            type: DataTypes.DATEONLY,
-            allowNull: false,
-            defaultValue: DataTypes.NOW, // Set the current date
+            type: DataTypes.DATE,
+                  allowNull: false,
+                  defaultValue: Sequelize.NOW,  
             get() {
                 return moment(this.getDataValue('cover_upload_date')).format('YYYY-MM-DD');
             }
         },
         user_id: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'user_id'
+            }
         }
     }, {
     sequelize,

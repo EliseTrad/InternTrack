@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Sequelize } = require('sequelize');
 const sequelize = require('../config/db-sequelize');
 const moment = require('moment');
 
@@ -15,7 +15,6 @@ Application.init(
     company_name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
     },
 
     position_title: {
@@ -24,16 +23,16 @@ Application.init(
     },
 
     application_date: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-      defaultValue: DataTypes.NOW, // Set the current date
+      type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: Sequelize.NOW,  
       get() {
         return moment(this.getDataValue('application_date')).format('YYYY-MM-DD');
       }
     },
 
     status: {
-      type: DataTypes.ENUM(['waitlist', 'rejected', 'not answered', 'accepted']),
+      type: DataTypes.ENUM(['waitlist', 'rejected', 'not_answered', 'accepted']),
       allowNull: false,
     },
 
