@@ -2,136 +2,130 @@ const Interview = require('../models/Interview');
 
 class InterviewsRepository {
   /**
-   * Create a new interview record.
-   * @param {Object} interview - The interview object.
-   * @returns {Promise<Interview>} The created interview object.
+   * Create a new interview record in the database.
+   * @param {Object} interview - The interview details to be saved.
+   * @returns {Promise<Interview>} The newly created interview.
    */
   static async createInterview(interview) {
     try {
       return await Interview.create(interview);
     } catch (error) {
-      console.error('Error creating interview:', error);
+      console.error('Failed to create interview:', error);
       throw error;
     }
   }
 
   /**
-   * Updates an interview by its ID.
-   * @param {number} id - The unique ID of the interview to update.
-   * @param {Object} updatedData - The data to update.
-   * @returns {Promise<Interview|null>} The updated interview object or null if not found.
+   * Update an existing interview by its ID.
+   * @param {number} id - ID of the interview to update.
+   * @param {Object} updateData - New values to update the interview with.
+   * @returns {Promise<Interview|null>} The updated interview or null if not found.
    */
   static async updateInterview(id, updateData) {
     try {
-      // Perform the update operation
       const [updatedRowsCount] = await Interview.update(updateData, {
         where: { interview_id: id },
       });
 
-      // If no rows were updated, return null
       if (updatedRowsCount === 0) {
-        return null; // Indicate that no interview was found with the given ID
+        return null; // No interview found with the given ID
       }
 
-      // Fetch and return the updated application
-      const updatedInterview = await Interview.findByPk(id);
-      return updatedInterview;
+      // Return the updated interview
+      return await Interview.findByPk(id);
     } catch (error) {
-      console.error(
-        'Error in InterviewsRepository while updating interview:',
-        error
-      );
-      throw error; // Propagate the raw database error to the service layer
+      console.error('Failed to update interview:', error);
+      throw error;
     }
   }
 
   /**
-   * Retrieves all interviews.
-   * @returns {Promise<Interview[]>} List of interviews.
+   * Fetch all interview records.
+   * @returns {Promise<Interview[]>} All interviews in the database.
    */
   static async getAllInterviews() {
     try {
       return await Interview.findAll();
     } catch (error) {
-      console.error('Error fetching interviews:', error);
+      console.error('Failed to fetch all interviews:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves an interview by its ID.
-   * @param {number} id - The unique ID of the interview.
-   * @returns {Promise<Interview|null>} The interview object if found, or null if not found.
+   * Get an interview by its ID.
+   * @param {number} id - The interview's unique ID.
+   * @returns {Promise<Interview|null>} The matching interview or null if not found.
    */
   static async getInterviewById(id) {
     try {
       return await Interview.findByPk(id);
     } catch (error) {
-      console.error('Error fetching the interview:', error);
+      console.error('Failed to fetch interview by ID:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves interviews by date.
-   * @param {Date} date - The date of the interview.
-   * @returns {Promise<Interview[]>} List of interviews on the given date.
+   * Find interviews scheduled on a specific date.
+   * @param {Date} date - Interview date to search for.
+   * @returns {Promise<Interview[]>} Interviews on the given date.
    */
   static async getInterviewsByDate(date) {
     try {
       return await Interview.findAll({ where: { interview_date: date } });
     } catch (error) {
-      console.error('Error fetching interviews by date:', error);
+      console.error('Failed to fetch interviews by date:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves interviews by location.
-   * @param {string} loc - The location of the interview.
-   * @returns {Promise<Interview[]>} List of interviews in the given location.
+   * Find interviews by location.
+   * @param {string} loc - Location to filter interviews by.
+   * @returns {Promise<Interview[]>} Interviews at the specified location.
    */
   static async getInterviewsByLocation(loc) {
     try {
       return await Interview.findAll({ where: { location: loc } });
     } catch (error) {
-      console.error('Error fetching interviews by location:', error);
+      console.error('Failed to fetch interviews by location:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves interviews by sent reminder status.
-   * @param {boolean} reminder - Whether a reminder was sent.
-   * @returns {Promise<Interview[]>} List of interviews matching the reminder status.
+   * Filter interviews based on reminder status.
+   * @param {boolean} reminder - Whether the reminder has been sent.
+   * @returns {Promise<Interview[]>} Interviews matching the reminder status.
    */
   static async getInterviewsByReminder(reminder) {
     try {
       return await Interview.findAll({ where: { reminder_sent: reminder } });
     } catch (error) {
-      console.error('Error fetching interviews by reminder status:', error);
+      console.error('Failed to fetch interviews by reminder status:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves interviews by their status.
-   * @param {string} status - The status of the interviews ('scheduled', 'completed', etc.).
-   * @returns {Promise<Interview[]>} List of interviews with the given status.
+   * Retrieve interviews by their current status.
+   * @param {string} status - Status to filter interviews by (e.g. 'scheduled').
+   * @returns {Promise<Interview[]>} Interviews matching the given status.
    */
   static async getInterviewsByStatus(status) {
     try {
       return await Interview.findAll({ where: { interview_status: status } });
     } catch (error) {
-      console.error('Error fetching interviews by status:', error);
+      console.error('Failed to fetch interviews by status:', error);
       throw error;
     }
   }
 
   /**
-   * Retrieves interviews by application ID.
-   * @param {number} applicationId - The ID of the associated application.
-   * @returns {Promise<Interview[]>} List of interviews linked to the given application ID.
+   * Get all interviews linked to a specific application.
+   * @param {number} applicationId - Application ID to search for.
+   * @returns {Promise<Interview[]>} Interviews linked to the application.
    */
   static async getInterviewsByApplicationId(applicationId) {
     try {
@@ -139,16 +133,15 @@ class InterviewsRepository {
         where: { application_id: applicationId },
       });
     } catch (error) {
-      console.error('Error fetching interviews by application ID:', error);
+      console.error('Failed to fetch interviews by application ID:', error);
       throw error;
     }
   }
 
   /**
-   * Counts the number of interviews for each status.
-   * @param {Array<string>} status - Status values to filter interviews by
-   *  (e.g., ['scheduled', 'completed']).
-   * @returns {Promise<Object>} A mapping of status to the count of interviews in that status.
+   * Count how many interviews exist for a given status.
+   * @param {Array<string>} status - Array of statuses to count (e.g., ['scheduled']).
+   * @returns {Promise<Object>} An object mapping status to interview count.
    */
   static async countInterviewsByStatus(status) {
     try {
@@ -158,15 +151,15 @@ class InterviewsRepository {
 
       return { [status]: count || 0 };
     } catch (error) {
-      console.error('Error counting interviews by status:', error);
+      console.error('Failed to count interviews by status:', error);
       throw error;
     }
   }
 
   /**
-   * Deletes an interview by its ID.
-   * @param {number} id - The unique ID of the interview.
-   * @returns {Promise<boolean>} True if the interview was deleted, false if not found.
+   * Delete an interview by its ID.
+   * @param {number} id - ID of the interview to delete.
+   * @returns {Promise<boolean>} True if deletion was successful, otherwise false.
    */
   static async deleteInterview(id) {
     try {
@@ -175,7 +168,7 @@ class InterviewsRepository {
       });
       return deleted > 0;
     } catch (error) {
-      console.error('Error deleting interview:', error);
+      console.error('Failed to delete interview:', error);
       throw error;
     }
   }

@@ -1,9 +1,20 @@
 const ResumesService = require('../services/resumesService');
 const { UserNotFoundError, NotFound } = require('../errors/customError');
 
+/**
+ * ResumesController class provides methods to handle HTTP requests related to resumes.
+ * Each method interacts with the ResumesService to perform CRUD operations on resumes.
+ */
 class ResumesController {
   /**
-   * Create a new resume.
+   * Creates a new resume in the system.
+   *
+   * @param {Object} req - The request object containing resume data in the body.
+   * @param {string} req.body.path - The file path (URL) of the resume.
+   * @param {string} req.body.name - The file name of the resume.
+   * @param {number} req.body.userId - The ID of the user associated with the resume.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the created resume or an error message.
    */
   static async createResume(req, res) {
     try {
@@ -30,7 +41,13 @@ class ResumesController {
   }
 
   /**
-   * Update a resume by ID.
+   * Updates a resume's details by its ID.
+   *
+   * @param {Object} req - The request object containing the resume ID in params and update data in the body.
+   * @param {string} req.params.id - The ID of the resume to update.
+   * @param {Object} req.body - The fields to update.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the updated resume or an error message.
    */
   static async updateResumeById(req, res) {
     try {
@@ -38,10 +55,9 @@ class ResumesController {
       const updateData = req.body;
 
       // Call the service to update the resume
-      const updatedResume =
-        await ResumesService.updateResumeById(id, updateData);
+      const updatedResume = await ResumesService.updateResumeById(id, updateData);
 
-      res.status(200).json(updatedResume);
+      res.status(200).json(updatedResume); // OK
     } catch (error) {
       if (error instanceof NotFound) {
         res.status(404).json({ message: error.message });
@@ -52,9 +68,13 @@ class ResumesController {
   }
 
   /**
-   * Retrieve all resumes.
+   * Retrieves all resumes from the database.
+   *
+   * @param {Object} _req - The request object (unused).
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the list of resumes or an error message.
    */
-  static async getAllResumes(req, res) {
+  static async getAllResumes(_req, res) {
     try {
       // Call the service to fetch all resumes
       const resumes = await ResumesService.getAllResumes();
@@ -72,7 +92,12 @@ class ResumesController {
   }
 
   /**
-   * Retrieve resumes by user ID.
+   * Retrieves all resumes associated with a user by their user ID.
+   *
+   * @param {Object} req - The request object containing the user ID in params.
+   * @param {string} req.params.userId - The ID of the user whose resumes to retrieve.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the list of resumes or an error message.
    */
   static async getResumesByUserId(req, res) {
     try {
@@ -98,7 +123,12 @@ class ResumesController {
   }
 
   /**
-   * Retrieve a resume by ID.
+   * Retrieves a resume by its unique ID.
+   *
+   * @param {Object} req - The request object containing the resume ID in params.
+   * @param {string} req.params.id - The ID of the resume to retrieve.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the resume or an error message.
    */
   static async getResumeById(req, res) {
     try {
@@ -124,7 +154,12 @@ class ResumesController {
   }
 
   /**
-   * Delete a resume by ID.
+   * Deletes a resume by its unique ID.
+   *
+   * @param {Object} req - The request object containing the resume ID in params.
+   * @param {string} req.params.id - The ID of the resume to delete.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response indicating success or failure.
    */
   static async deleteResumeById(req, res) {
     try {

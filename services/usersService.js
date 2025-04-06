@@ -7,8 +7,25 @@ const {
   InvalidPassword,
 } = require('../errors/customError');
 
+/**
+ * UserService class provides business logic for user-related operations.
+ * Each method interacts with the UsersRepository to perform CRUD operations on users.
+ */
 class UserService {
-  // create a new user
+  /**
+   * Creates a new user in the database.
+   * Validates that the email and username are unique before creating the user.
+   *
+   * @param {Object} userData - The user data to create.
+   * @param {string} userData.user_name - The username of the user.
+   * @param {string} userData.user_email - The email of the user.
+   * @param {string} userData.user_password - The password of the user (will be hashed automatically).
+   * @param {string|null} [userData.profile_picture] - Optional profile picture URL.
+   * @param {Date} [userData.account_created_date] - Optional creation date (defaults to current date).
+   * @returns {Promise<User>} The created user object.
+   * @throws {EmailAlreadyExistsError} If the email is already in use.
+   * @throws {NameAlreadyExistsError} If the username is already in use.
+   */
   static async createUser({
     user_name,
     user_email,
@@ -17,14 +34,15 @@ class UserService {
     account_created_date = new Date(),
   }) {
     try {
-      const existingUserByEmail = await UsersRepository.getUserByEmail(
-        user_email
-      );
+      // Check if the email is already in use
+      const existingUserByEmail = await UsersRepository.getUserByEmail(user_email);
       if (existingUserByEmail) throw new EmailAlreadyExistsError();
 
+      // Check if the username is already in use
       const existingUserByName = await UsersRepository.getUserByName(user_name);
       if (existingUserByName) throw new NameAlreadyExistsError();
 
+      // Create the user in the repository
       return await UsersRepository.createUser({
         user_name,
         user_email,
@@ -33,192 +51,150 @@ class UserService {
         account_created_date,
       });
     } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
+      console.error('Error in usersService while creating user:', error);
+      throw error; // Propagate the error to the controller
     }
   }
 
-  // update name by id
-  static async updateNameById(name, id) {
-    try {
-      const existingUser = await UsersRepository.getUserById(id);
-      if (!existingUser) throw new NotFound(`User with id ${id} is not found.`);
-
-      const existingUserByName = await UsersRepository.getUserByName(name);
-      if (existingUserByName) throw new NameAlreadyExistsError();
-
-      const updatedUser = await UsersRepository.updateNameById(name, id);
-      if (!updatedUser) throw new Error('Failed to update user.');
-
-      return updatedUser;
-    } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
-    }
-  }
-
-  // update email by id
-  static async updateEmailById(email, id) {
-    try {
-      const existingUser = await UsersRepository.getUserById(id);
-      if (!existingUser) throw new NotFound(`User with id ${id} is not found.`);
-
-      const userWithEmail = await UsersRepository.getUserByEmail(email);
-      if (userWithEmail && userWithEmail.id !== id)
-        throw new EmailAlreadyExistsError();
-
-      const updatedUser = await UsersRepository.updateEmailById(email, id);
-      if (!updatedUser) throw new Error('Failed to update user email.');
-
-      return updatedUser;
-    } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
-    }
-  }
-
-  // update password by id
-  static async updatePasswordById(password, id) {
-    try {
-      const existingUser = await UsersRepository.getUserById(id);
-      if (!existingUser) throw new NotFound(`User with id ${id} is not found.`);
-
-      const updatedUser = await UsersRepository.updatePasswordById(
-        password,
-        id
-      );
-      if (!updatedUser) throw new Error('Failed to update user.');
-
-      return updatedUser;
-    } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
-    }
-  }
-
-  // update profile by id
-  static async updateProfileById(profile, id) {
-    try {
-      const existingUser = await UsersRepository.getUserById(id);
-      if (!existingUser) throw new NotFound(`User with id ${id} is not found.`);
-
-      const updatedUser = await UsersRepository.updateProfileById(profile, id);
-      if (!updatedUser) throw new Error('Failed to update user.');
-
-      return updatedUser;
-    } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
-    }
-  }
-
-  // update user by id
+  /**
+   * Updates the details of a user by their ID.
+   *
+   * @param {number} id - The ID of the user to update.
+   * @param {Object} updateData - The fields to update.
+   * @returns {Promise<User>} The updated user object.
+   * @throws {NotFound} If the user with the given ID is not found.
+   */
   static async updateUserById(id, updateData) {
-    // Check if the user exists
-    const existingUser = await UsersRepository.getUserById(id);
-    if (!existingUser) throw new NotFound(`User with ID ${id} not found.`);
-    
-    // Update the user
-    return await UsersRepository.updateUserById(id, updateData);
-  }
-  catch(error) {
-    console.error('Error in UsersService while updating user:', error);
-    throw error;
+    try {
+      // Check if the user exists
+      const existingUser = await UsersRepository.getUserById(id);
+      if (!existingUser) throw new NotFound(`User with ID ${id} not found.`);
+
+      // Update the user in the repository
+      return await UsersRepository.updateUserById(id, updateData);
+    } catch (error) {
+      console.error('Error in UsersService while updating user:', error);
+      throw error; // Propagate the error to the controller
+    }
   }
 
-  // read all users
+  /**
+   * Retrieves all users from the database.
+   *
+   * @returns {Promise<User[]>} A list of all users.
+   * @throws {Error} If there is an issue fetching users.
+   */
   static async getAllUsers() {
     try {
       return await UsersRepository.getAllUsers();
     } catch (error) {
-      console.error('Error in usersService:', error);
+      console.error('Error in usersService while fetching all users:', error);
       throw new Error('Unable to fetch users. Please try again later.');
     }
   }
 
-  // read user by id
+  /**
+   * Retrieves a user by their ID.
+   *
+   * @param {number} id - The ID of the user to retrieve.
+   * @returns {Promise<User>} The user object if found.
+   * @throws {NotFound} If the user with the given ID is not found.
+   */
   static async getUserById(id) {
     try {
       const user = await UsersRepository.getUserById(id);
-
-      if (!user) {
-        throw new NotFound(`User with id ${id} is not found.`);
-      }
+      if (!user) throw new NotFound(`User with ID ${id} not found.`);
       return user;
     } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
+      console.error('Error in usersService while fetching user by ID:', error);
+      throw error; // Propagate the error to the controller
     }
   }
 
-  // read user by name
+  /**
+   * Retrieves a user by their username.
+   *
+   * @param {string} name - The username of the user to retrieve.
+   * @returns {Promise<User>} The user object if found.
+   * @throws {NotFound} If the user with the given username is not found.
+   */
   static async getUserByName(name) {
     try {
       const user = await UsersRepository.getUserByName(name);
-
-      if (!user) {
-        throw new NotFound(`User with name ${name} is not found.`);
-      }
+      if (!user) throw new NotFound(`User with name "${name}" not found.`);
       return user;
     } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
+      console.error('Error in usersService while fetching user by name:', error);
+      throw error; // Propagate the error to the controller
     }
   }
 
-  // read user by email
+  /**
+   * Retrieves a user by their email address.
+   *
+   * @param {string} email - The email address of the user to retrieve.
+   * @returns {Promise<User>} The user object if found.
+   * @throws {NotFound} If the user with the given email is not found.
+   */
   static async getUserByEmail(email) {
     try {
       const user = await UsersRepository.getUserByEmail(email);
-
-      if (!user) {
-        throw new NotFound(`User with email ${email} is not found.`);
-      }
+      if (!user) throw new NotFound(`User with email "${email}" not found.`);
       return user;
     } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
+      console.error('Error in usersService while fetching user by email:', error);
+      throw error; // Propagate the error to the controller
     }
   }
 
-  // authenticate user
+  /**
+   * Authenticates a user by their username and password.
+   *
+   * @param {string} name - The username of the user.
+   * @param {string} password - The password to validate.
+   * @returns {Promise<User>} The authenticated user object if successful.
+   * @throws {NotFound} If the user with the given username is not found.
+   * @throws {InvalidPassword} If the provided password is incorrect.
+   */
   static async authenticate(name, password) {
     try {
-      // Fetch user from the repository
+      // Fetch the user by username
       const user = await UsersRepository.getUserByName(name);
+      if (!user) throw new NotFound(`User with name "${name}" not found.`);
 
-      // If user is not found, throw an error
-      if (!user) throw new NotFound(`User with name ${name} is not found.`);
-
-      // Check if the password is correct using the validPassword method
+      // Validate the password
       const isPasswordValid = await user.validPassword(password);
-
-      // If password is invalid, throw an error
-      if (!isPasswordValid) {
-        throw new InvalidPassword();
-      }
+      if (!isPasswordValid) throw new InvalidPassword();
 
       return user; // Return the authenticated user
     } catch (error) {
-      console.error('Error in usersService:', error);
-      throw error;
+      console.error('Error in usersService while authenticating user:', error);
+      throw error; // Propagate the error to the controller
     }
   }
 
-  // delete user by id
+  /**
+   * Deletes a user by their ID.
+   *
+   * @param {number} id - The ID of the user to delete.
+   * @returns {Promise<boolean>} True if the user was successfully deleted.
+   * @throws {NotFound} If the user with the given ID is not found.
+   * @throws {UserConflictError} If the user is referenced in other records.
+   */
   static async deleteUser(id) {
     try {
-      const found = await UsersRepository.getUserById(id);
-
       // Check if the user exists
-      if (!found) throw new NotFound(`User with id ${id} is not found.`);
+      const found = await UsersRepository.getUserById(id);
+      if (!found) throw new NotFound(`User with ID ${id} not found.`);
 
+      // Delete the user from the repository
       await UsersRepository.deleteUser(id);
 
       return true; // Indicate successful deletion
     } catch (error) {
-      console.error('Error in service while deleting user:', error);
+      console.error('Error in usersService while deleting user:', error);
 
+      // Handle foreign key constraint errors
       if (error.name === 'SequelizeForeignKeyConstraintError') {
         throw new UserConflictError();
       }

@@ -2,16 +2,24 @@ const { DataTypes, Model, Sequelize } = require('sequelize');
 const sequelize = require('../config/db-sequelize');
 const bcrypt = require('bcryptjs');
 
-// User model to represent user data in the 'users' table
+/**
+ * User model to represent user data in the 'users' table.
+ * This model defines the structure of the 'users' table, including fields, validations, and hooks.
+ */
 class User extends Model {
-  // Method to validate passwords
-  // Compares the given password with the hashed password in the database
+  /**
+   * Validates a password by comparing it with the hashed password stored in the database.
+   * @param {string} password - The plain-text password to validate.
+   * @returns {boolean} - Returns true if the password matches, false otherwise.
+   */
   validPassword(password) {
     return bcrypt.compareSync(password, this.user_password);
   }
 }
 
-// Initialize the User model with its fields, validations, and hooks
+/**
+ * Initialize the User model with its fields, validations, and hooks.
+ */
 User.init(
   {
     // User ID: Auto-incremented primary key
@@ -32,7 +40,7 @@ User.init(
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true, // Ensures value is a valid email
+        isEmail: true, // Ensures the value is a valid email address
       },
     },
     // Password: Non-null field, length of 60 characters for hashed password
@@ -45,35 +53,49 @@ User.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    // Account creation date: Automatically set to current timestamp when a user is created
+    // Account creation date: Automatically set to the current timestamp when a user is created
     account_created_date: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,
+      defaultValue: Sequelize.NOW, // Automatically sets the current timestamp
     },
   },
   {
-    sequelize,
-    modelName: 'User',
-    tableName: 'users', // Specifies the table name
-    timestamps: false, // Disables automatic timestamps
+    sequelize, // Sequelize instance
+    modelName: 'User', // Name of the model
+    tableName: 'users', // Specifies the table name in the database
+    timestamps: false, // Disables automatic createdAt and updatedAt fields
 
+    /**
+     * Hooks (Lifecycle Events)
+     */
     hooks: {
-      // Hook to hash password before creating a user
+      /**
+       * Hook to hash the password before creating a user.
+       * Ensures the password is securely hashed before being stored in the database.
+       * @param {User} user - The user instance being created.
+       */
       beforeCreate: async (user) => {
         if (user.user_password) {
           // Ensure password exists before hashing
-          user.user_password = await bcrypt.hash(user.user_password, 10);
+          user.user_password = await bcrypt.hash(user.user_password, 10); // Hash the password with a salt round of 10
         }
       },
-      // Hook to hash password before updating a user, if password has changed
+
+      /**
+       * Hook to hash the password before updating a user, if the password has changed.
+       * Ensures the updated password is securely hashed before being stored in the database.
+       * @param {User} user - The user instance being updated.
+       */
       beforeUpdate: async (user) => {
         if (user.changed('user_password') && user.user_password) {
-          user.user_password = await bcrypt.hash(user.user_password, 10);
+          // Check if the password field has been modified
+          user.user_password = await bcrypt.hash(user.user_password, 10); // Hash the updated password
         }
       },
     },
   }
 );
 
+// Export the User model for use in other parts of the application
 module.exports = User;

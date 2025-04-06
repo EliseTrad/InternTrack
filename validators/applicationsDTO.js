@@ -1,79 +1,112 @@
 const { body, param, validationResult, oneOf } = require('express-validator');
 
+/**
+ * Middleware to validate application creation input.
+ * Ensures that required fields meet specific criteria.
+ */
 const validateApplication = [
+  // Validate the 'companyName' field (required)
   body('companyName')
     .notEmpty()
-    .withMessage('Company name is required.')
+    .withMessage('Company name is required.') // Ensure the company name is provided
     .isString()
-    .withMessage('Company name must be a string.'),
+    .withMessage('Company name must be a string.'), // Ensure the company name is a string
 
+  // Validate the 'positionTitle' field (required)
   body('positionTitle')
     .notEmpty()
-    .withMessage('Position title is required.')
+    .withMessage('Position title is required.') // Ensure the position title is provided
     .isString()
-    .withMessage('Position title must be a string.'),
+    .withMessage('Position title must be a string.'), // Ensure the position title is a string
 
+  // Validate the 'status' field (required)
   body('status')
     .notEmpty()
-    .withMessage('Status is required.')
+    .withMessage('Status is required.') // Ensure the status is provided
     .isIn(['waitlist', 'rejected', 'not_answered', 'accepted'])
     .withMessage(
       "Status must be one of: 'waitlist', 'rejected', 'not_answered', 'accepted'."
-    ),
+    ), // Ensure the status is one of the allowed values
 
+  // Validate the optional 'deadline' field
   body('deadline')
-    .optional()
+    .optional() // Field is not required
     .isISO8601()
-    .withMessage('Deadline must be a valid date (YYYY-MM-DD).'),
+    .withMessage('Deadline must be a valid date (YYYY-MM-DD).'), // Ensure the deadline is a valid date
 
-  body('notes').optional().isString().withMessage('Notes must be a string.'),
+  // Validate the optional 'notes' field
+  body('notes')
+    .optional() // Field is not required
+    .isString()
+    .withMessage('Notes must be a string.'), // Ensure the notes are a string
 
+  // Validate the 'applicationSource' field (required)
   body('applicationSource')
     .notEmpty()
-    .withMessage('Application source is required.')
+    .withMessage('Application source is required.') // Ensure the application source is provided
     .isString()
-    .withMessage('Application source must be a string.'),
+    .withMessage('Application source must be a string.'), // Ensure the application source is a string
 
+  // Validate the 'userId' field (required)
   body('userId')
     .notEmpty()
-    .withMessage('User ID is required.')
+    .withMessage('User ID is required.') // Ensure the user ID is provided
     .isInt()
-    .withMessage('User ID must be an integer.'),
+    .withMessage('User ID must be an integer.'), // Ensure the user ID is a valid integer
 
+  // Validate the 'resumeId' field (required)
   body('resumeId')
     .notEmpty()
-    .withMessage('Resume ID is required.')
+    .withMessage('Resume ID is required.') // Ensure the resume ID is provided
     .isInt()
-    .withMessage('Resume ID must be an integer.'),
+    .withMessage('Resume ID must be an integer.'), // Ensure the resume ID is a valid integer
 
+  // Validate the optional 'coverId' field
   body('coverId')
-    .optional()
+    .optional() // Field is not required
     .isInt()
-    .withMessage('Cover letter ID must be an integer.'),
+    .withMessage('Cover letter ID must be an integer.'), // Ensure the cover letter ID is a valid integer
 
+  // Validate the optional 'date' field
   body('date')
     .optional() // Default is now
     .isISO8601()
-    .withMessage('Application date must be a valid date (YYYY-MM-DD).'),
+    // Ensure the application date is a valid date
+    .withMessage('Application date must be a valid date (YYYY-MM-DD).'), 
 
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(404).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
     next();
   },
 ];
 
+/**
+ * Middleware to validate application ID in URL parameters.
+ * Ensures that the 'id' parameter is a valid integer.
+ */
 const validationApplicationId = [
   // Validate that 'id' is an integer and not empty
   param('id')
     .isInt()
-    .withMessage('ID must be an integer.')
+    .withMessage('ID must be an integer.') // Ensure the ID is a valid integer
     .notEmpty()
-    .withMessage('ID is required.'),
+    .withMessage('ID is required.'), // Ensure the ID is provided
 
-  // Middleware to check for validation errors
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -83,29 +116,73 @@ const validationApplicationId = [
   },
 ];
 
+/**
+ * Middleware to validate application updates.
+ * Only validates fields that are provided in the update data.
+ */
 const validationUpdate = [
-  body('company_name').optional().isString().trim(),
-  body('position_title').optional().isString().trim(),
+  body('company_name')
+    .optional() // Field is not required
+    .isString()
+    .trim(), // Ensure the company name is a trimmed string
+
+  body('position_title')
+    .optional() // Field is not required
+    .isString()
+    .trim(), // Ensure the position title is a trimmed string
+
   body('status')
-    .optional()
-    .isIn(['waitlist', 'rejected', 'not_answered', 'accepted']),
-  body('deadline').optional().isISO8601().toDate(),
-  body('notes').optional().isString().trim(),
-  body('application_source').optional().isString().trim(),
-  body('user_id').optional().isInt({ min: 1 }),
-  body('resume_id').optional().isInt({ min: 1 }),
-  body('cover_letter_id').optional().isInt({ min: 1 }),
+    .optional() // Field is not required
+    .isIn(['waitlist', 'rejected', 'not_answered', 'accepted']), // Ensure the status is one of 
+                                                                 // the allowed values
+
+  body('deadline')
+    .optional() // Field is not required
+    .isISO8601()
+    .toDate(), // Ensure the deadline is a valid date
+
+  body('notes')
+    .optional() // Field is not required
+    .isString()
+    .trim(), // Ensure the notes are a trimmed string
+
+  body('application_source')
+    .optional() // Field is not required
+    .isString()
+    .trim(), // Ensure the application source is a trimmed string
+
+  body('user_id')
+    .optional() // Field is not required
+    .isInt({ min: 1 }), // Ensure the user ID is a positive integer
+
+  body('resume_id')
+    .optional() // Field is not required
+    .isInt({ min: 1 }), // Ensure the resume ID is a positive integer
+
+  body('cover_letter_id')
+    .optional() // Field is not required
+    .isInt({ min: 1 }), // Ensure the cover letter ID is a positive integer
 ];
 
+/**
+ * Middleware to validate application status in URL parameters.
+ * Ensures that the 'status' parameter is one of the allowed values.
+ */
 const validationStatus = [
   param('status')
     .notEmpty()
-    .withMessage('Status is required.')
+    .withMessage('Status is required.') // Ensure the status is provided
     .isIn(['waitlist', 'rejected', 'not_answered', 'accepted'])
     .withMessage(
       "Status must be one of: 'waitlist', 'rejected', 'not_answered', 'accepted'."
-    ),
-  // Middleware to check for validation errors
+    ), // Ensure the status is one of the allowed values
+
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -115,24 +192,36 @@ const validationStatus = [
   },
 ];
 
+/**
+ * Middleware to validate application date or deadline in URL parameters.
+ * Ensures that either 'date' or 'deadline' is a valid ISO 8601 date.
+ */
 const validationDate = [
   oneOf(
     [
       param('date')
         .notEmpty()
-        .withMessage('Application date is required.')
+        .withMessage('Application date is required.') // Ensure the application date is provided
         .isISO8601()
-        .withMessage('Application date must be a valid date (YYYY-MM-DD).'),
+        .withMessage('Application date must be a valid date (YYYY-MM-DD).'), // Ensure the application 
+                                                                             // date is a valid date
 
       param('deadline')
         .notEmpty()
-        .withMessage('Application date is required.')
+        .withMessage('Application deadline is required.') // Ensure the application deadline is provided
         .isISO8601()
-        .withMessage('Application date must be a valid date (YYYY-MM-DD).'),
+        // Ensure the application deadline is a valid date
+        .withMessage('Application deadline must be a valid date (YYYY-MM-DD).'),
     ],
     'Date and deadline must be valid.'
   ),
-  // Middleware to check for validation errors
+
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -4,29 +4,41 @@ const UsersRepository = require('../repositories/usersRepository');
 const ResumesRepository = require('../repositories/resumesRepository');
 const CoverLettersRepository = require('../repositories/coverLettersRepository');
 
+/**
+ * ApplicationsService class provides methods to handle business logic for application-related operations.
+ * Each method interacts with the ApplicationsRepository to perform CRUD operations on applications.
+ */
 class ApplicationsService {
   /**
-   * Creates a new application.
+   * Creates a new application in the system.
+   *
    * @param {Object} applicationData - The validated application object.
+   * @param {string} applicationData.company_name - The name of the company.
+   * @param {string} applicationData.position_title - The title of the position applied for.
+   * @param {string} applicationData.status - The status of the application ('waitlist', 'rejected', etc.).
+   * @param {Date|null} [applicationData.deadline] - Optional deadline date of the application.
+   * @param {string} [applicationData.notes] - Optional notes about the application.
+   * @param {string} applicationData.application_source - The source of the application.
+   * @param {number} applicationData.user_id - The ID of the user who created the application.
+   * @param {number} applicationData.resume_id - The ID of the resume used in the application.
+   * @param {number|null} [applicationData.cover_letter_id] - Optional ID of the cover letter used 
+   *                                                          in the application.
    * @returns {Promise<Object>} The created application object.
-   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not
-   *                          found or if there's a database error.
+   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not found or if there's a 
+   *                          database error.
    */
   static async createApplication(applicationData) {
     try {
       // Validate related entities
       const { user_id, resume_id, cover_letter_id } = applicationData;
-
       const userExists = await UsersRepository.getUserById(user_id);
       if (!userExists) {
         throw new NotFound(`User with ID ${user_id} not found.`);
       }
-
       const resumeExists = await ResumesRepository.getResumeById(resume_id);
       if (!resumeExists) {
         throw new NotFound(`Resume with ID ${resume_id} not found.`);
       }
-
       if (cover_letter_id) {
         const coverLetterExists =
           await CoverLettersRepository.getCoverLetterById(cover_letter_id);
@@ -36,7 +48,6 @@ class ApplicationsService {
           );
         }
       }
-
       // Create the application
       return await ApplicationsRepository.createApplication(applicationData);
     } catch (error) {
@@ -53,7 +64,16 @@ class ApplicationsService {
    * Only updates the fields provided in the request.
    *
    * @param {number} id - The ID of the application to update.
-   * @param {Object} updateData - Fields to update (optional fields handled gracefully).
+   * @param {Object} updateData - An object containing the fields to update.
+   * @param {string} [updateData.company_name] - The updated company name (optional).
+   * @param {string} [updateData.position_title] - The updated position title (optional).
+   * @param {string} [updateData.status] - The updated status ('waitlist', 'rejected', etc.) (optional).
+   * @param {Date|null} [updateData.deadline] - The updated deadline date (optional).
+   * @param {string} [updateData.notes] - The updated notes (optional).
+   * @param {string} [updateData.application_source] - The updated application source (optional).
+   * @param {number} [updateData.user_id] - The updated user ID (optional).
+   * @param {number} [updateData.resume_id] - The updated resume ID (optional).
+   * @param {number|null} [updateData.cover_letter_id] - The updated cover letter ID (optional).
    * @returns {Promise<Object>} The updated application object.
    * @throws {NotFound|Error} If the application or related entities are not found or there's a database error.
    */
@@ -65,7 +85,6 @@ class ApplicationsService {
       if (!existingApplication) {
         throw new NotFound(`Application with ID ${id} not found.`);
       }
-
       // Validate related entities if provided
       if (updateData.user_id) {
         const userExists = await UsersRepository.getUserById(
@@ -75,7 +94,6 @@ class ApplicationsService {
           throw new NotFound(`User with ID ${updateData.user_id} not found.`);
         }
       }
-
       if (updateData.resume_id) {
         const resumeExists = await ResumesRepository.getResumeById(
           updateData.resume_id
@@ -86,7 +104,6 @@ class ApplicationsService {
           );
         }
       }
-
       if (updateData.cover_letter_id !== undefined) {
         const coverLetterExists =
           await CoverLettersRepository.getCoverLetterById(
@@ -98,7 +115,6 @@ class ApplicationsService {
           );
         }
       }
-
       // Update the application
       return await ApplicationsRepository.updateApplicationById(id, updateData);
     } catch (error) {
@@ -111,7 +127,8 @@ class ApplicationsService {
   }
 
   /**
-   * Retrieves all applications.
+   * Retrieves all applications from the database.
+   *
    * @returns {Promise<Object[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching applications.
    */
@@ -129,6 +146,7 @@ class ApplicationsService {
 
   /**
    * Retrieves an application by its unique ID.
+   *
    * @param {number} id - The unique ID of the application.
    * @returns {Promise<Object>} The application object if found.
    * @throws {NotFound|Error} If the application is not found or there's a database error.
@@ -151,9 +169,9 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by user ID.
+   *
    * @param {number} userId - The ID of the user.
-   * @returns {Promise<Object[]>} A list of applications associated with the user
-   *                                (empty array if none found).
+   * @returns {Promise<Object[]>} A list of applications associated with the user (empty array if none found).
    * @throws {NotFound|Error} If the user does not exist or if there's a database error.
    */
   static async getApplicationsForUser(userId) {
@@ -162,7 +180,6 @@ class ApplicationsService {
       if (!userExists) {
         throw new NotFound(`User with ID ${userId} not found.`);
       }
-
       return await ApplicationsRepository.getApplicationsForUser(userId);
     } catch (error) {
       console.error(
@@ -175,6 +192,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by company name.
+   *
    * @param {string} name - The company name of the application.
    * @returns {Promise<Object[]>} A list of applications matching the company name.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -198,6 +216,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by position title.
+   *
    * @param {string} title - The position title of the application.
    * @returns {Promise<Object[]>} A list of applications matching the position title.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -223,6 +242,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by status.
+   *
    * @param {string} status - The status of the application.
    * @returns {Promise<Object[]>} A list of applications matching the status.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -247,6 +267,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by deadline.
+   *
    * @param {string} deadline - The deadline date of the application ('YYYY-MM-DD').
    * @returns {Promise<Object[]>} A list of applications matching the deadline.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -270,6 +291,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by date.
+   *
    * @param {string} date - The date of the application ('YYYY-MM-DD').
    * @returns {Promise<Object[]>} A list of applications matching the date.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -294,6 +316,7 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by source.
+   *
    * @param {string} source - The source of the application.
    * @returns {Promise<Object[]>} A list of applications matching the source.
    * @throws {NotFound|Error} If no applications are found or there's a database error.
@@ -318,6 +341,7 @@ class ApplicationsService {
 
   /**
    * Deletes an application by its ID.
+   *
    * @param {number} id - The ID of the application to delete.
    * @returns {Promise<boolean>} True if the application was deleted, false if not found.
    * @throws {NotFound|Error} If the application does not exist or if there's a database error.
@@ -330,7 +354,6 @@ class ApplicationsService {
       if (!applicationExists) {
         throw new NotFound(`Application with ID ${id} not found.`);
       }
-
       return await ApplicationsRepository.deleteApplicationById(id);
     } catch (error) {
       console.error(
@@ -343,10 +366,10 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by resume ID.
+   *
    * @param {number} id - The ID of the resume.
    * @returns {Promise<Object[]>} A list of applications associated with the resume.
-   * @throws {NotFound|Error} If the resume or applications are not found or
-   *                          there's a database error.
+   * @throws {NotFound|Error} If the resume or applications are not found or there's a database error.
    */
   static async getApplicationsByResumeId(id) {
     try {
@@ -354,7 +377,6 @@ class ApplicationsService {
       if (!resume) {
         throw new NotFound(`Resume with ID ${id} not found.`);
       }
-
       const applications =
         await ApplicationsRepository.getApplicationsByResumeId(id);
       if (!applications || applications.length === 0) {
@@ -372,10 +394,10 @@ class ApplicationsService {
 
   /**
    * Retrieves applications by cover letter ID.
+   *
    * @param {number} coverId - The ID of the cover letter.
    * @returns {Promise<Object[]>} A list of applications associated with the cover letter.
-   * @throws {NotFound|Error} If the cover letter or applications are not found or
-   *                           there's a database error.
+   * @throws {NotFound|Error} If the cover letter or applications are not found or there's a database error.
    */
   static async getApplicationsByCoverLetterId(coverId) {
     try {
@@ -385,7 +407,6 @@ class ApplicationsService {
       if (!coverLetter) {
         throw new NotFound(`Cover letter with ID ${coverId} not found.`);
       }
-
       const applications =
         await ApplicationsRepository.getApplicationsByCoverLetterId(coverId);
       if (!applications || applications.length === 0) {
@@ -405,6 +426,7 @@ class ApplicationsService {
 
   /**
    * Counts the number of applications associated with a specific user ID.
+   *
    * @param {number} userId - The ID of the user.
    * @returns {Promise<number>} The count of applications associated with the user.
    * @throws {NotFound|Error} If the user does not exist or if there's a database error.
@@ -415,7 +437,6 @@ class ApplicationsService {
       if (!userExists) {
         throw new NotFound(`User with ID ${userId} not found.`);
       }
-
       return await ApplicationsRepository.countApplicationsForUser(userId);
     } catch (error) {
       console.error(

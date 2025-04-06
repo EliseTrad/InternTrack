@@ -243,8 +243,8 @@ class InterviewsService {
   }
 
   /**
-   * Counts the number of interviews for each status.
-   * @param {Array<string>} status - status value to filter interviews by.
+   * Counts the number of interviews for status.
+   * @param {string} status - status value to filter interviews by.
    * @returns {Promise<Object>} A mapping of status to the count of interviews in that status.
    * @throws {Error} If there is an issue fetching the interview count.
    */

@@ -1,5 +1,9 @@
 const Application = require('../models/Application');
 
+/**
+ * ApplicationsRepository class provides methods to interact with the 'applications' table in the database.
+ * Each method handles a specific operation related to application data (create, read, update, delete).
+ */
 class ApplicationsRepository {
   /**
    * Creates a new application in the database.
@@ -23,19 +27,9 @@ class ApplicationsRepository {
    * Accepts individual fields as parameters and updates only the provided fields.
    *
    * @param {number} id - The ID of the application to update.
-   * @param {string} [companyName] - The updated name of the company (optional).
-   * @param {string} [positionTitle] - The updated position title of the internship (optional).
-   * @param {('waitlist'|'rejected'|'not_answered'|'accepted')} [status]
-   *                                    - The updated status of the application (optional).
-   * @param {Date|null} [deadline] - The updated deadline date of the application (optional).
-   * @param {string} [notes] - The updated notes about the application (optional).
-   * @param {string} [source] - The updated source of the application (optional).
-   * @param {number} [userId] - The updated ID of the owner of the application (optional).
-   * @param {number} [resumeId] - The updated ID of the resume used in the application (optional).
-   * @param {number|null} [coverLetterId]
-   *                      - The updated ID of the cover letter used in the application (optional).
-   * @returns {Object|null} - The updated object if successful, or `null` if no rows were updated.
-   * @throws {Error} - If there is an issue with the database query.
+   * @param {Object} updateData - An object containing the fields to update.
+   * @returns {Promise<Object|null>} The updated application object if successful, or `null` if no rows were updated.
+   * @throws {Error} If there is an issue with the database query.
    */
   static async updateApplicationById(id, updateData) {
     try {
@@ -75,6 +69,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves an application by its unique ID.
+   *
    * @param {number} id - The unique ID of the application.
    * @returns {Promise<Application|null>} The application object if found, or null if not found.
    * @throws {Error} If there is an issue fetching the application.
@@ -90,6 +85,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a resume ID.
+   *
    * @param {number} id - The ID of the resume.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -105,6 +101,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a specific status.
+   *
    * @param {string} status - The status of the application.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -122,6 +119,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a cover letter ID.
+   *
    * @param {number} id - The ID of the cover letter.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -137,6 +135,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a company name.
+   *
    * @param {string} name - The company name of the application.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -152,6 +151,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a source.
+   *
    * @param {string} source - The source of the application.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -169,6 +169,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves applications by a position title.
+   *
    * @param {string} title - The position title of the application.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
@@ -184,6 +185,7 @@ class ApplicationsRepository {
 
   /**
    * Retrieves all applications created on a specific date.
+   *
    * @param {string} date - The application date ('YYYY-MM-DD').
    * @returns {Promise<Application[]>} A list of applications created on the given date.
    * @throws {Error} If there is an issue fetching applications by the creation date.
@@ -199,8 +201,9 @@ class ApplicationsRepository {
 
   /**
    * Retrieves all applications by a specific deadline.
+   *
    * @param {string} date - The application deadline ('YYYY-MM-DD').
-   * @returns {Promise<Application[]>} A list of applications that has the given deadline.
+   * @returns {Promise<Application[]>} A list of applications that have the given deadline.
    * @throws {Error} If there is an issue fetching applications by their deadline.
    */
   static async getApplicationsByDeadline(date) {
@@ -214,6 +217,7 @@ class ApplicationsRepository {
 
   /**
    * Deletes an application by its unique ID.
+   *
    * @param {number} id - The unique ID of the application.
    * @returns {Promise<boolean>} True if the application was deleted, false if not found.
    * @throws {Error} If a database error occurs or application not found.

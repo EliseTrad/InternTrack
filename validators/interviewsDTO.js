@@ -1,10 +1,13 @@
 const { body, param, validationResult } = require('express-validator');
 
+/**
+ * Middleware to validate the creation or update of an interview.
+ */
 const validateInterview = [
   body('interview_date')
     .isISO8601()
     .withMessage(
-      'Interview date must be a valid datetime (YYYY-MM-DDTHH:mm:ss).'
+      'Interview date must be a valid datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).'
     )
     .toDate(),
 
@@ -16,21 +19,21 @@ const validateInterview = [
 
   body('interviewer_email')
     .isEmail()
-    .withMessage('Interviewer email must be valid!')
+    .withMessage('Interviewer email must be a valid email address.')
     .notEmpty()
-    .withMessage('Interviewer email is required!'),
+    .withMessage('Interviewer email is required.'),
 
   body('location')
     .notEmpty()
-    .withMessage('location is required.')
+    .withMessage('Location is required.')
     .isString()
-    .withMessage('location must be a string.'),
+    .withMessage('Location must be a string.'),
 
   body('reminder_sent')
     .notEmpty()
-    .withMessage('location is required.')
+    .withMessage('Reminder status is required.')
     .isBoolean()
-    .withMessage('Reminder should be a boolean (true or false).'),
+    .withMessage('Reminder status must be a boolean value (true or false).'),
 
   body('interview_status')
     .notEmpty()
@@ -46,6 +49,12 @@ const validateInterview = [
     .isInt()
     .withMessage('Application ID must be an integer.'),
 
+  /**
+   * Middleware to handle validation errors.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -55,6 +64,9 @@ const validateInterview = [
   },
 ];
 
+/**
+ * Middleware to validate the interview ID parameter.
+ */
 const validationInterviewId = [
   param('id')
     .isInt()
@@ -63,7 +75,7 @@ const validationInterviewId = [
     .withMessage('ID is required.'),
 
   /**
-   * Middleware to check for validation errors and respond accordingly.
+   * Middleware to handle validation errors.
    * @param {Object} req - The request object.
    * @param {Object} res - The response object.
    * @param {function} next - The next middleware function.
@@ -77,15 +89,18 @@ const validationInterviewId = [
   },
 ];
 
+/**
+ * Middleware to validate the reminder status parameter.
+ */
 const validationReminder = [
   param('reminder')
     .notEmpty()
-    .withMessage('location is required.')
+    .withMessage('Reminder status is required.')
     .isBoolean()
-    .withMessage('Reminder should be a boolean (true or false).'),
+    .withMessage('Reminder status must be a boolean value (true or false).'),
 
   /**
-   * Middleware to check for validation errors and respond accordingly.
+   * Middleware to handle validation errors.
    * @param {Object} req - The request object.
    * @param {Object} res - The response object.
    * @param {function} next - The next middleware function.
@@ -99,6 +114,9 @@ const validationReminder = [
   },
 ];
 
+/**
+ * Middleware to validate the interview status parameter.
+ */
 const validationStatus = [
   param('status')
     .notEmpty()
@@ -109,7 +127,7 @@ const validationStatus = [
     ),
 
   /**
-   * Middleware to check for validation errors and respond accordingly.
+   * Middleware to handle validation errors.
    * @param {Object} req - The request object.
    * @param {Object} res - The response object.
    * @param {function} next - The next middleware function.
@@ -123,12 +141,15 @@ const validationStatus = [
   },
 ];
 
+/**
+ * Middleware to validate the partial update of an interview.
+ */
 const validationUpdateInterview = [
   body('interview_date')
     .optional()
     .isISO8601()
     .withMessage(
-      'Interview date must be a valid datetime (YYYY-MM-DDTHH:mm:ss).'
+      'Interview date must be a valid datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).'
     )
     .toDate(),
 
@@ -140,7 +161,7 @@ const validationUpdateInterview = [
   body('interviewer_email')
     .optional()
     .isEmail()
-    .withMessage('Interviewer email must be valid!'),
+    .withMessage('Interviewer email must be a valid email address.'),
 
   body('location')
     .optional()
@@ -150,7 +171,7 @@ const validationUpdateInterview = [
   body('reminder_sent')
     .optional()
     .isBoolean()
-    .withMessage('Reminder should be a boolean (true or false).'),
+    .withMessage('Reminder status must be a boolean value (true or false).'),
 
   body('interview_status')
     .optional()
@@ -164,7 +185,12 @@ const validationUpdateInterview = [
     .isInt()
     .withMessage('Application ID must be an integer.'),
 
-  // Middleware to return errors
+  /**
+   * Middleware to handle validation errors.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -174,19 +200,27 @@ const validationUpdateInterview = [
   },
 ];
 
+/**
+ * Middleware to validate a date parameter.
+ */
 const validateDate = [
   param('date')
     .isISO8601()
-    .withMessage('Date must be a valid datetime (YYYY-MM-DDTHH:mm:ss).')
-    .toDate(), // Converts the validated string to a JavaScript Date object
+    .withMessage('Date must be a valid datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).')
+    .toDate(),
 
-  // Middleware to check for validation errors
+  /**
+   * Middleware to handle validation errors.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    next(); // Proceed to the next middleware/controller
+    next();
   },
 ];
 
