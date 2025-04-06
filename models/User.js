@@ -22,13 +22,13 @@ User.init(
     },
     // Username: Unique, non-null field with a max length of 50
     user_name: {
-      type: DataTypes.STRING(50), 
+      type: DataTypes.STRING(50),
       allowNull: false,
       unique: true,
     },
     // Email: Unique, non-null field with email validation
     user_email: {
-      type: DataTypes.STRING(100), 
+      type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
       validate: {
@@ -37,7 +37,7 @@ User.init(
     },
     // Password: Non-null field, length of 60 characters for hashed password
     user_password: {
-      type: DataTypes.STRING(60), 
+      type: DataTypes.STRING(60),
       allowNull: false,
     },
     // Profile Picture: Optional field
@@ -49,7 +49,7 @@ User.init(
     account_created_date: {
       type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: Sequelize.NOW,  
+      defaultValue: Sequelize.NOW,
     },
   },
   {
@@ -61,7 +61,8 @@ User.init(
     hooks: {
       // Hook to hash password before creating a user
       beforeCreate: async (user) => {
-        if (user.user_password) { // Ensure password exists before hashing
+        if (user.user_password) {
+          // Ensure password exists before hashing
           user.user_password = await bcrypt.hash(user.user_password, 10);
         }
       },
@@ -71,7 +72,7 @@ User.init(
           user.user_password = await bcrypt.hash(user.user_password, 10);
         }
       },
-    },    
+    },
   }
 );
 

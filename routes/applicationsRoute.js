@@ -1,71 +1,96 @@
 const express = require('express');
 const ApplicationsController = require('../controllers/applicationsController');
 const router = express.Router();
-const { validateApplication, validationApplicationId } = require('../validators/applicationsDTO');
+const {
+  validateApplication,
+  validationApplicationId,
+  validationStatus,
+  validationDate,
+  validationUpdate
+} = require('../validators/applicationsDTO');
 const { validationUserId } = require('../validators/usersDTO');
 const { validationResumeId } = require('../validators/resumesDTO');
 const { validationCoverLetterId } = require('../validators/coverLettersDTO');
 
-// createApplication
-router.post('/create', validateApplication, validationUserId, validationResumeId, validationCoverLetterId,
-    (req, res) => ApplicationsController.createApplication(req, res));
+// create application
+router.post('/create', validateApplication, (req, res) =>
+  ApplicationsController.createApplication(req, res)
+);
 
-// updateApplication
-router.put('/update/:id', validateApplication, validationUserId, validationResumeId, validationCoverLetterId,
-    (req, res) => ApplicationsController.updateApplication(req, res));
+// update application
+router.put(
+  '/update/:id', validationUpdate,
+  (req, res) => ApplicationsController.updateApplicationById(req, res)
+);
 
-// getAllApplications
-router.get('/', (req, res) => ApplicationsController.getAllApplications(req, res));
+// get all applications
+router.get('/', (req, res) =>
+  ApplicationsController.getAllApplications(req, res)
+);
 
-//  getApplicationById
+//  get application by id
 router.get('/:id', validationApplicationId, (req, res) =>
-    ApplicationsController.getApplicationById(req, res));
+  ApplicationsController.getApplicationById(req, res)
+);
 
-// getApplicationsByUserId
-router.get('/user/:id', validationUserId, (req, res) => 
-    ApplicationsController.getApplicationsByUserId(req, res));
+// get applications by user id
+router.get('/user/:id', validationUserId, (req, res) =>
+  ApplicationsController.getApplicationsByUserId(req, res)
+);
 
-// getApplicationsByCompanyName
-router.get('/company/:name', (req, res) => ApplicationsController.getApplicationsByCompanyName(req, res));
+// get applications by company name
+router.get('/company/:name', (req, res) =>
+  ApplicationsController.getApplicationsByCompanyName(req, res)
+);
 
-// getApplicationsByPositionTitle
-router.get('/position/:title', (req, res) => 
-    ApplicationsController.getApplicationsByPositionTitle(req, res));
+// get applications by position title
+router.get('/position/:title', (req, res) =>
+  ApplicationsController.getApplicationsByPositionTitle(req, res)
+);
 
-// getApplicationsByStatus
-router.get('/status/:stat', (req, res) => ApplicationsController.getApplicationsByStatus(req, res));
+// get applications by status
+router.get('/status/:status', validationStatus, (req, res) =>
+  ApplicationsController.getApplicationsByStatus(req, res)
+);
 
-// getApplicationsByDeadline
-router.get('/deadline/:d', (req, res) => ApplicationsController.getApplicationsByDeadline(req, res));
+// get applications by deadline
+router.get('/deadline/:deadline', validationDate, (req, res) =>
+  ApplicationsController.getApplicationsByDeadline(req, res)
+);
 
-// getApplicationsBySource
-router.get('/source/:s', (req, res) => ApplicationsController.getApplicationsBySource(req, res));
+// get applications by the date 
+router.get('/date/:date', validationDate, (req, res) =>
+  ApplicationsController.getApplicationsByDate(req, res)
+);
 
-// getApplicationsByResumeId
-router.get('/resume/:id', validationResumeId, (req, res) =>
-    ApplicationsController.getApplicationsByResumeId(req, res));
+// get applications by source
+router.get('/source/:source', (req, res) =>
+  ApplicationsController.getApplicationsBySource(req, res)
+);
 
-// getApplicationsByCoverLetterId
-router.get('/cover/:id', (req, res) => ApplicationsController.getApplicationsByCoverLetterId(req, res));
+// get applications by resume id
+router.get('/resume/:resumeId', validationResumeId, (req, res) =>
+  ApplicationsController.getApplicationsByResumeId(req, res)
+);
 
-// countApplicationsByStatuses
-router.get('/countByStatuses/:s',
-    (req, res) => ApplicationsController.countApplicationsByStatuses(req, res));
+// get applications by cover letter id
+router.get('/cover/:coverId', validationCoverLetterId, (req, res) =>
+  ApplicationsController.getApplicationsByCoverLetterId(req, res)
+);
 
-// deleteApplicationById
-router.delete('/delete/:id', validationApplicationId, 
-    (req, res) => ApplicationsController.deleteApplicationById(req, res));
+// get count of applications for user
+router.get('/count/:userId', validationUserId, (req, res) =>
+  ApplicationsController.countApplicationsForUser(req, res)
+);
 
-// countApplicationsByStatuses
-router.get('/countByUserId/:id', validationUserId,
-    (req, res) => ApplicationsController.countApplicationsByUserId(req, res));
+// export applications to Excel
+router.get('/export/excel/:userId', validationUserId, (req, res) =>
+  ApplicationsController.exportApplicationsToExcel(req, res)
+);
 
-// Route to export applications to Excel
-router.get('/export/excel/:userId', validationUserId, 
-    (req, res) => ApplicationsController.exportApplicationsToExcel(req, res));
-
-// Route to export applications to PDF
-router.get('/export/pdf/:userId', validationUserId, 
-    (req, res) => ApplicationsController.exportApplicationsToPDF(req, res));
+// delete application by id
+router.delete('/delete/:id', validationApplicationId, (req, res) =>
+  ApplicationsController.deleteApplicationById(req, res)
+);
 
 module.exports = router;

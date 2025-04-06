@@ -1,43 +1,69 @@
 const express = require('express');
-const InterviewController = require('../controllers/interviewsController');
+const InterviewsController = require('../controllers/interviewsController');
 const router = express.Router();
-const { validateInterview, validationInterviewId } = require('../validators/interviewsDTO');
-const { validationApplicationId } = require('../validators/applicationsDTO');
+const {
+  validateInterview,
+  validationUpdateInterview,
+  validationInterviewId,
+  validationStatus,
+  validationReminder,
+  validateDate
+} = require('../validators/interviewsDTO');
+const {
+  validationApplicationId,
+} = require('../validators/applicationsDTO');
 
-// createInterview
-router.post('/create', validateInterview, validationApplicationId, InterviewController.createInterview);
+// create an interview
+router.post('/create', validateInterview, (req, res) =>
+  InterviewsController.createInterview(req, res)
+);
 
-// updateInterview
-router.put('/update', validationInterviewId , validateInterview, validationApplicationId, 
-            InterviewController.updateInterview);
+// update interview
+router.put('/update/:id', validationUpdateInterview, (req, res) =>
+  InterviewsController.updateInterview(req, res)
+);
 
-// getAllInterviews
-router.get('/', InterviewController.getAllInterviews);
+// get all interviews
+router.get('/', (req, res) => InterviewsController.getAllInterviews(req, res));
 
 // getInterviewById
-router.get('/:id', InterviewController.getInterviewById);
+router.get('/:id', validationInterviewId, (req, res) =>
+  InterviewsController.getInterviewById(req, res)
+);
 
 // getInterviewsByDate
-router.get('/date/:date', InterviewController.getInterviewsByDate);
+router.get('/date/:date', validateDate, (req, res) =>
+  InterviewsController.getInterviewsByDate(req, res)
+);
 
 // getInterviewsByLocation
-router.get('/location/:loc', InterviewController.getInterviewsByLocation);
+router.get('/location/:loc', (req, res) =>
+  InterviewsController.getInterviewsByLocation(req, res)
+);
 
 // getInterviewsByReminder
-router.get('/reminder/:reminder', InterviewController.getInterviewsByReminder);
+router.get('/reminder/:reminder', validationReminder, (req, res) =>
+  InterviewsController.getInterviewsByReminder(req, res)
+);
 
 // getInterviewsByStatus
-router.get('/status/:status', InterviewController.getInterviewsByStatus);
+router.get('/status/:status', validationStatus, (req, res) =>
+  InterviewsController.getInterviewsByStatus(req, res)
+);
 
 // getInterviewsByApplicationId
-router.get('/application/:id', InterviewController.getInterviewsByApplicationId);
+router.get('/application/:id', validationApplicationId, (req, res) =>
+  InterviewsController.getInterviewsByApplicationId(req, res)
+);
 
 // countInterviewsByStatuses
-router.get('/statuses/:id', InterviewController.countInterviewsByStatuses);
+router.get('/count/status/:status', validationStatus, (req, res) =>
+  InterviewsController.countInterviewsByStatus(req, res)
+);
 
 // deleteInterview
-router.get('/delete/:id', InterviewController.deleteInterview);
+router.delete('/delete/:id', validationInterviewId, (req, res) =>
+  InterviewsController.deleteInterview(req, res)
+);
 
 module.exports = router;
-
-

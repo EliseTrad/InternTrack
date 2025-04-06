@@ -14,13 +14,11 @@ app.use(bodyParser.json());
 
 app.use('/api/users', usersRoute);
 app.use('/api/resumes', resumesRoute);
-app.use('/api/interviews', interviewsRoute);``
+app.use('/api/interviews', interviewsRoute);
 app.use('/api/covers', coverLettersRoute);
 app.use('/api/applications', applicationsRoute);
 
-const PORT = process.env.PORT   
-app.listen(PORT, ()=>{
-    console.log(`Server running on ${PORT}`)
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log(`Server running on ${PORT}`);
 });
-
-

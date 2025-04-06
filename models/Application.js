@@ -1,15 +1,17 @@
 const { DataTypes, Model, Sequelize } = require('sequelize');
 const sequelize = require('../config/db-sequelize');
-const moment = require('moment');
+const User = require('../models/User');
+const CoverLetter = require('../models/CoverLetter');
+const Resume = require('../models/Resume');
 
-class Application extends Model { }
+class Application extends Model {}
 
 Application.init(
   {
     application_id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      primaryKey: true
+      primaryKey: true,
     },
 
     company_name: {
@@ -23,60 +25,62 @@ Application.init(
     },
 
     application_date: {
-      type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: Sequelize.NOW,  
-      get() {
-        return moment(this.getDataValue('application_date')).format('YYYY-MM-DD');
-      }
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: Sequelize.NOW,
     },
 
     status: {
-      type: DataTypes.ENUM(['waitlist', 'rejected', 'not_answered', 'accepted']),
+      type: DataTypes.ENUM([
+        'waitlist',
+        'rejected',
+        'not_answered',
+        'accepted',
+      ]),
       allowNull: false,
     },
 
     deadline: {
-      type: DataTypes.DATE,
-      allowNull: true
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
 
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
     },
 
     application_source: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
 
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'users',
-        key: 'user_id'
-      }
+        model: User,
+        key: 'user_id',
+      },
     },
 
     resume_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'resumes',
-        key: 'resume_id'
-      }
+        model: Resume,
+        key: 'resume_id',
+      },
     },
 
     cover_letter_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
-        model: 'cover_letters',
-        key: 'cover_letter_id'
-      }
-    }
+        model: CoverLetter,
+        key: 'cover_letter_id',
+      },
+    },
   },
   {
     sequelize,
