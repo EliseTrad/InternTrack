@@ -1,6 +1,6 @@
-# Intertracker
+# Interntracker
 
-**Intertracker** is a simple and efficient platform designed to help students and young professionals manage their internship applications effectively.
+**Interntracker** is a simple and efficient platform designed to help students and young professionals manage their internship applications effectively.
 
 It provides tools for:
 - Application tracking
