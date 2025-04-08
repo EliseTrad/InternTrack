@@ -6,6 +6,8 @@ const {
   validationUserId,
   validationName,
   validateUpdate,
+  validationEmail,
+  validateAuthentication,
 } = require('../validators/usersDTO');
 
 // Register user
@@ -14,7 +16,7 @@ router.post('/register', validateUser, (req, res) =>
 );
 
 // Authenticate user
-router.post('/authenticate', validationName, (req, res) =>
+router.post('/authenticate', validateAuthentication, (req, res) =>
   UserController.authenticate(req, res)
 );
 
@@ -37,7 +39,7 @@ router.get('/name/:name', validationName, (req, res) =>
 );
 
 // Get user by email
-router.get('/email/:email', (req, res) =>
+router.get('/email/:email', validationEmail, (req, res) =>
   UserController.getUserByEmail(req, res)
 );
 

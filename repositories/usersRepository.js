@@ -16,7 +16,7 @@ class UsersRepository {
    * @param {string} user.password - The password of the user account (will be hashed automatically).
    * @param {string|null} user.profile_picture - Optional profile picture path.
    * @returns {Promise<User>} The created user object.
-   * @throws {Error} If there is an issue creating the user (e.g., duplicate email or invalid data).
+   * @throws {Error} If there is an issue creating the user.
    */
   static async createUser(user) {
     try {
@@ -41,17 +41,16 @@ class UsersRepository {
    */
   static async updateUserById(id, updateData) {
     try {
-      const [updatedRowsCount] = await User.update(updateData, {
-        where: { user_id: id },
-      });
+      const user = await User.findByPk(id);
+      if (!user) return null;
 
-      if (updatedRowsCount === 0) return null; // No rows were updated
+      Object.assign(user, updateData); // Update fields
+      await user.save(); // Triggers beforeUpdate hook (if password is being updated)
 
-      const updatedUser = await User.findByPk(id); // Fetch the updated user
-      return updatedUser;
+      return user;
     } catch (error) {
       console.error('Error in UsersRepository while updating user:', error);
-      throw error; // Propagate the error to the service layer
+      throw error;
     }
   }
 

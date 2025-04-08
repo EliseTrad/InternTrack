@@ -1,5 +1,5 @@
 const CoverLettersService = require('../services/coverLettersService');
-const { UserNotFoundError, NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 
 /**
  * CoverLettersController class provides methods to handle HTTP requests related to cover letters.
@@ -35,7 +35,7 @@ class CoverLettersController {
         error
       );
 
-      if (error instanceof UserNotFoundError) {
+      if (error instanceof NotFound) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -46,7 +46,7 @@ class CoverLettersController {
   /**
    * Updates a cover letter's details by its ID.
    *
-   * @param {Object} req - The request object containing the cover letter ID in params and update 
+   * @param {Object} req - The request object containing the cover letter ID in params and update
    *                       data in the body.
    * @param {string} req.params.id - The ID of the cover letter to update.
    * @param {Object} req.body - The fields to update.
@@ -59,7 +59,10 @@ class CoverLettersController {
       const updateData = req.body;
 
       // Call the service to update the cover letter
-      const updatedCover = await CoverLettersService.updateCoverLetterById(id, updateData);
+      const updatedCover = await CoverLettersService.updateCoverLetterById(
+        id,
+        updateData
+      );
 
       res.status(200).json(updatedCover); // OK
     } catch (error) {
@@ -118,7 +121,38 @@ class CoverLettersController {
         error
       );
 
-      if (error instanceof UserNotFoundError) {
+      if (error instanceof NotFound) {
+        res.status(error.statusCode).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred.' });
+      }
+    }
+  }
+
+  /**
+   * Retrieves all cover letters associated with a specific file name.
+   *
+   * @param {Object} req - The request object containing the file name in params.
+   * @param {string} req.params.name - The name of the file whose cover letters to retrieve.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the list of cover letters or an error message.
+   */
+  static async getCoverLettersByName(req, res) {
+    try {
+      const { name } = req.params; // Extract file name from route parameters
+
+      // Call the service to fetch cover letters 
+      const covers = await CoverLettersService.getCoverLettersByName(name);
+
+      // Return the list of cover letters
+      res.status(200).json(covers); // OK
+    } catch (error) {
+      console.error(
+        'Error in CoverLettersController while fetching cover letters by file name:',
+        error
+      );
+
+      if (error instanceof NotFound) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -180,7 +214,7 @@ class CoverLettersController {
         error
       );
 
-      if (error instanceof NotFound) {
+      if (error instanceof NotFound || error instanceof ConflictError) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });

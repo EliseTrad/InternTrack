@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const ApplicationsService = require('../services/applicationsService');
-const { NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 const ExcelJS = require('exceljs');
 
 /**
@@ -25,7 +25,7 @@ class ApplicationsController {
    * @param {number|null} [req.body.coverId] - Optional ID of the cover letter used in the application.
    * @param {Object} res - The response object.
    * @returns {Promise<void>} Responds with the created application or an error message.
-   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not found or if there's a 
+   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not found or if there's a
    *                          database error.
    */
   static async createApplication(req, res) {
@@ -88,7 +88,7 @@ class ApplicationsController {
    * @param {Object} req.body - Validated fields to update.
    * @param {Object} res - The response object.
    * @returns {Promise<void>} Responds with the updated application or an error message.
-   * @throws {NotFound|Error} If the application or related entities are not found or there's 
+   * @throws {NotFound|Error} If the application or related entities are not found or there's
    *                          a database error.
    */
   static async updateApplicationById(req, res) {
@@ -103,7 +103,7 @@ class ApplicationsController {
       res.status(200).json(updatedApplication);
     } catch (error) {
       if (error instanceof NotFound) {
-        res.status(404).json({ message: error.message });
+        res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'Could not update the application.' });
       }
@@ -142,13 +142,61 @@ class ApplicationsController {
   }
 
   /**
+   * Retrieves all applications.
+   *
+   * @param {Request} req - The request object.
+   * @param {Response} res - The response object.
+   * @returns {Response} A list of applications or an error message.
+   */
+  static async getAllApplications(req, res) {
+    try {
+      const applications = await ApplicationsService.getAllApplications();
+      return res.status(200).json(applications);
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsController while fetching all applications:',
+        error
+      );
+      return res
+        .status(500)
+        .json({ message: 'An error occurred while fetching applications.' });
+    }
+  }
+
+  /**
+   * Retreive an application by its ID.
+   *
+   * @param {Request} req - The request object.
+   * @param {Response} res - The response object.
+   * @returns {Response} The application object or an error message.
+   */
+  static async getApplicationById(req, res) {
+    try {
+      const { id } = req.params;
+      const application = await ApplicationsService.getApplicationById(id);
+      return res.status(200).json(application);
+    } catch (error) {
+      if (error instanceof NotFound) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      console.error(
+        'Error in ApplicationsController while fetching application by ID:',
+        error
+      );
+      return res
+        .status(500)
+        .json({ message: 'An error occurred while fetching the application.' });
+    }
+  }
+
+  /**
    * Retrieves applications by company name.
    *
    * @param {Object} req - The request object.
    * @param {Object} req.params - Route parameters.
    * @param {string} req.params.name - The company name of the application.
    * @param {Object} res - The response object.
-   * @returns {Promise<void>} Responds with the list of applications matching the company name or 
+   * @returns {Promise<void>} Responds with the list of applications matching the company name or
    *                          an error message.
    * @throws {NotFound|Error} If no applications are found or if there's a database error.
    */
@@ -180,7 +228,7 @@ class ApplicationsController {
    * @param {Object} req.params - Route parameters.
    * @param {string} req.params.title - The position title of the application.
    * @param {Object} res - The response object.
-   * @returns {Promise<void>} Responds with the list of applications matching the position title or 
+   * @returns {Promise<void>} Responds with the list of applications matching the position title or
    *                          an error message.
    * @throws {NotFound|Error} If no applications are found or if there's a database error.
    */
@@ -355,7 +403,7 @@ class ApplicationsController {
         error
       );
 
-      if (error instanceof NotFound) {
+      if (error instanceof NotFound || error instanceof ConflictError) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -402,9 +450,9 @@ class ApplicationsController {
    * @param {Object} req.params - Route parameters.
    * @param {number} req.params.coverId - The ID of the cover letter.
    * @param {Object} res - The response object.
-   * @returns {Promise<void>} Responds with the list of applications associated with the cover letter 
+   * @returns {Promise<void>} Responds with the list of applications associated with the cover letter
    *                          or an error message.
-   * @throws {NotFound|Error} If the cover letter or applications are not found or if there's a 
+   * @throws {NotFound|Error} If the cover letter or applications are not found or if there's a
    *                          database error.
    */
   static async getApplicationsByCoverLetterId(req, res) {
@@ -478,6 +526,13 @@ class ApplicationsController {
         userId
       );
 
+      // Check if no applications were found for the user
+      if (applications.length === 0) {
+        return res
+          .status(404)
+          .json({ message: 'No applications found for this user.' });
+      }
+
       // Create a new Excel workbook and worksheet
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Applications');
@@ -522,11 +577,15 @@ class ApplicationsController {
 
       // Write the Excel file to the response
       await workbook.xlsx.write(res);
-      res.end(); // End the response
+      res.end(); // End the response after sending the file
     } catch (error) {
-      // Log the error and send a generic error message
       console.error('Error exporting to Excel:', error);
-      res
+      // If the error is a NotFound error, return a 404
+      if (error instanceof NotFound) {
+        return res.status(error.statusCode).json({ message: error.message });
+      }
+      // If another error occurs, send a generic error message
+      return res
         .status(500)
         .json({ message: 'Could not export applications to Excel.' });
     }

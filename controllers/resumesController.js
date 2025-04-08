@@ -1,5 +1,5 @@
 const ResumesService = require('../services/resumesService');
-const { UserNotFoundError, NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 
 /**
  * ResumesController class provides methods to handle HTTP requests related to resumes.
@@ -32,7 +32,7 @@ class ResumesController {
     } catch (error) {
       console.error('Error in ResumesController while creating resume:', error);
 
-      if (error instanceof UserNotFoundError) {
+      if (error instanceof FoundError) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -114,7 +114,38 @@ class ResumesController {
         error
       );
 
-      if (error instanceof UserNotFoundError) {
+      if (error instanceof NotFound) {
+        res.status(error.statusCode).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: 'An unexpected error occurred.' });
+      }
+    }
+  }
+
+  /**
+   * Retrieves all resumes associated with a file name.
+   *
+   * @param {Object} req - The request object containing the name in params.
+   * @param {string} req.params.name - The file name of the resumes to retrieve.
+   * @param {Object} res - The response object used to send the result back to the client.
+   * @returns {Promise<void>} Sends a JSON response with the list of resumes or an error message.
+   */
+  static async getResumesByName(req, res) {
+    try {
+      const { name } = req.params; // Extract file name from route parameters
+
+      // Call the service to fetch resumes 
+      const resumes = await ResumesService.getResumesByName(name);
+
+      // Return the list of resumes
+      res.status(200).json(resumes); // OK
+    } catch (error) {
+      console.error(
+        'Error in ResumesController while fetching resumes by user ID:',
+        error
+      );
+
+      if (error instanceof NotFound) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -173,7 +204,7 @@ class ResumesController {
     } catch (error) {
       console.error('Error in ResumesController while deleting resume:', error);
 
-      if (error instanceof NotFound) {
+      if (error instanceof NotFound || error instanceof ConflictError) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });

@@ -59,6 +59,7 @@ Application.init(
     status: {
       type: DataTypes.ENUM('waitlist', 'rejected', 'not_answered', 'accepted'),
       allowNull: false, // Cannot be null
+      defaultValue: 'not_answered',
     },
 
     /**

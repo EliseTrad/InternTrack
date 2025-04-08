@@ -6,13 +6,13 @@
  */
 
 /**
- * Represents an error when a user is referenced in other records and cannot be deleted.
+ * Represents an error when an item is referenced in other records and cannot be deleted.
  * Status Code: 409 (Conflict)
  */
-class UserConflictError extends Error {
+class ConflictError extends Error {
   constructor() {
-    super("The user is referenced in other records and cannot be deleted."); // Standardized message
-    this.name = "UserConflictError"; // Name of the error
+    super("Cannot delete: This item is referenced in other records."); // Standardized message
+    this.name = "ConflictError"; // Name of the error
     this.statusCode = 409; // HTTP status code for conflict errors
   }
 }
@@ -72,7 +72,7 @@ class NotFound extends Error {
 module.exports = {
   EmailAlreadyExistsError,
   NameAlreadyExistsError,
-  UserConflictError,
+  ConflictError,
   InvalidPassword,
   NotFound,
 };

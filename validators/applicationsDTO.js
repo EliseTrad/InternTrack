@@ -8,21 +8,21 @@ const validateApplication = [
   // Validate the 'companyName' field (required)
   body('companyName')
     .notEmpty()
-    .withMessage('Company name is required.') // Ensure the company name is provided
+    .withMessage('Company name is required.') 
     .isString()
-    .withMessage('Company name must be a string.'), // Ensure the company name is a string
+    .withMessage('Company name must be a string.'), 
 
   // Validate the 'positionTitle' field (required)
   body('positionTitle')
     .notEmpty()
-    .withMessage('Position title is required.') // Ensure the position title is provided
+    .withMessage('Position title is required.') 
     .isString()
-    .withMessage('Position title must be a string.'), // Ensure the position title is a string
+    .withMessage('Position title must be a string.'), 
 
   // Validate the 'status' field (required)
   body('status')
     .notEmpty()
-    .withMessage('Status is required.') // Ensure the status is provided
+    .withMessage('Status is required.') 
     .isIn(['waitlist', 'rejected', 'not_answered', 'accepted'])
     .withMessage(
       "Status must be one of: 'waitlist', 'rejected', 'not_answered', 'accepted'."
@@ -30,48 +30,47 @@ const validateApplication = [
 
   // Validate the optional 'deadline' field
   body('deadline')
-    .optional() // Field is not required
+    .optional() 
     .isISO8601()
-    .withMessage('Deadline must be a valid date (YYYY-MM-DD).'), // Ensure the deadline is a valid date
+    .withMessage('Deadline must be a valid date (YYYY-MM-DD).'), 
 
   // Validate the optional 'notes' field
   body('notes')
-    .optional() // Field is not required
+    .optional() 
     .isString()
-    .withMessage('Notes must be a string.'), // Ensure the notes are a string
+    .withMessage('Notes must be a string.'), 
 
   // Validate the 'applicationSource' field (required)
-  body('applicationSource')
+  body('source')
     .notEmpty()
-    .withMessage('Application source is required.') // Ensure the application source is provided
+    .withMessage('Application source is required.') 
     .isString()
-    .withMessage('Application source must be a string.'), // Ensure the application source is a string
+    .withMessage('Application source must be a string.'), 
 
   // Validate the 'userId' field (required)
   body('userId')
     .notEmpty()
-    .withMessage('User ID is required.') // Ensure the user ID is provided
+    .withMessage('User ID is required.') 
     .isInt()
-    .withMessage('User ID must be an integer.'), // Ensure the user ID is a valid integer
+    .withMessage('User ID must be an integer.'), 
 
   // Validate the 'resumeId' field (required)
   body('resumeId')
     .notEmpty()
-    .withMessage('Resume ID is required.') // Ensure the resume ID is provided
+    .withMessage('Resume ID is required.') 
     .isInt()
-    .withMessage('Resume ID must be an integer.'), // Ensure the resume ID is a valid integer
+    .withMessage('Resume ID must be an integer.'), 
 
   // Validate the optional 'coverId' field
   body('coverId')
     .optional() // Field is not required
     .isInt()
-    .withMessage('Cover letter ID must be an integer.'), // Ensure the cover letter ID is a valid integer
+    .withMessage('Cover letter ID must be an integer.'), 
 
   // Validate the optional 'date' field
   body('date')
     .optional() // Default is now
     .isISO8601()
-    // Ensure the application date is a valid date
     .withMessage('Application date must be a valid date (YYYY-MM-DD).'), 
 
   /**

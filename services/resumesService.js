@@ -1,5 +1,5 @@
 const ResumesRepository = require('../repositories/resumesRepository');
-const { NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 const UsersRepository = require('../repositories/usersRepository');
 
 /**
@@ -13,7 +13,6 @@ class ResumesService {
    * @param {Object} resumeData - The data for the new resume.
    * @param {string} resumeData.resume_file_path - The file path (URL) of the resume.
    * @param {string} resumeData.resume_file_name - The file name of the resume.
-   * @param {Date} [resumeData.resume_upload_date] - The upload date of the resume (defaults to current date).
    * @param {number} resumeData.user_id - The ID of the user associated with the resume.
    * @returns {Promise<Object>} The created resume object.
    * @throws {Error} If there is an issue creating the resume.
@@ -60,7 +59,9 @@ class ResumesService {
 
       // Validate related entities if provided
       if (updateData.user_id) {
-        const userExists = await UsersRepository.getUserById(updateData.user_id);
+        const userExists = await UsersRepository.getUserById(
+          updateData.user_id
+        );
         if (!userExists) {
           throw new NotFound(`User with ID ${updateData.user_id} not found.`);
         }
@@ -84,7 +85,10 @@ class ResumesService {
     try {
       return await ResumesRepository.getAllResumes();
     } catch (error) {
-      console.error('Error in ResumesService while fetching all resumes:', error);
+      console.error(
+        'Error in ResumesService while fetching all resumes:',
+        error
+      );
       throw new Error('Unable to fetch resumes. Please try again later.');
     }
   }
@@ -106,7 +110,34 @@ class ResumesService {
       // Fetch resumes for the user
       return await ResumesRepository.getResumesByUserId(userId);
     } catch (error) {
-      console.error('Error in ResumesService while fetching resumes by user ID:', error);
+      console.error(
+        'Error in ResumesService while fetching resumes by user ID:',
+        error
+      );
+      throw error; // Propagate the error to the controller
+    }
+  }
+
+  /**
+   * Retrieves all resumes associated with a specific file name.
+   *
+   * @param {number} name - The file name of the resumes to retrieve.
+   * @returns {Promise<Resume[]>} A list of resumes.
+   * @throws {Error} If there is an issue fetching the resumes.
+   */
+  static async getResumesByName(name) {
+    try {
+      // Check if the resume exists
+      const resume = await ResumesRepository.getResumesByName(name);
+      if (!resume) throw new NotFound(`Resume with ID ${name} not found.`);
+
+      // Fetch resumes for the user
+      return resume;
+    } catch (error) {
+      console.error(
+        'Error in ResumesService while fetching resumes by name:',
+        error
+      );
       throw error; // Propagate the error to the controller
     }
   }
@@ -126,7 +157,10 @@ class ResumesService {
 
       return resume;
     } catch (error) {
-      console.error('Error in ResumesService while fetching resume by ID:', error);
+      console.error(
+        'Error in ResumesService while fetching resume by ID:',
+        error
+      );
       throw error; // Propagate the error to the controller
     }
   }
@@ -149,6 +183,12 @@ class ResumesService {
       return await ResumesRepository.deleteResumeById(id);
     } catch (error) {
       console.error('Error in ResumesService while deleting resume:', error);
+
+      // Handle foreign key constraint errors
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        throw new ConflictError();
+      }
+
       throw error; // Propagate the error to the controller
     }
   }

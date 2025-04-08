@@ -7,11 +7,9 @@ const {
   validationInterviewId,
   validationStatus,
   validationReminder,
-  validateDate
+  validateDate,
 } = require('../validators/interviewsDTO');
-const {
-  validationApplicationId,
-} = require('../validators/applicationsDTO');
+const { validationApplicationId } = require('../validators/applicationsDTO');
 
 // create an interview
 router.post('/create', validateInterview, (req, res) =>
@@ -19,8 +17,11 @@ router.post('/create', validateInterview, (req, res) =>
 );
 
 // update interview
-router.put('/update/:id', validationUpdateInterview, (req, res) =>
-  InterviewsController.updateInterview(req, res)
+router.put(
+  '/update/:id',
+  validationUpdateInterview,
+  validationApplicationId,
+  (req, res) => InterviewsController.updateInterview(req, res)
 );
 
 // get all interviews

@@ -8,20 +8,20 @@ const validateCoverLetter = [
   // Validate the 'path' field (URL of the cover letter file)
   body('path')
     .isURL()
-    .withMessage('Invalid file path URL') // Ensure the URL is valid
+    .withMessage('Invalid file path URL')
     .isLength({ max: 600 })
-    .withMessage('File path URL is too long!') // Ensure the URL is not excessively long
+    .withMessage('File path URL is too long!')
     .notEmpty()
-    .withMessage('File path URL is required!'), // Ensure the URL is provided
+    .withMessage('File path URL is required!'),
 
   // Validate the 'name' field (file name of the cover letter)
   body('name')
     .isString()
-    .withMessage('File name must be a string!') // Ensure the name is a string
+    .withMessage('File name must be a string!')
     .notEmpty()
-    .withMessage('File name is required!') // Ensure the name is provided
+    .withMessage('File name is required!')
     .isLength({ min: 3, max: 50 })
-    .withMessage('File name must be between 3 and 50 characters.') // Ensure the name length is within limits
+    .withMessage('File name must be between 3 and 50 characters.')
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage(
       'File name can only contain letters, numbers, and underscores'
@@ -58,21 +58,21 @@ const validateUpdate = [
   body('cover_file_path')
     .optional() // Field is not required
     .isURL()
-    .withMessage('Invalid file path URL') // Ensure the URL is valid
+    .withMessage('Invalid file path URL')
     .isLength({ max: 600 })
-    .withMessage('File path URL is too long!') // Ensure the URL is not excessively long
+    .withMessage('File path URL is too long!')
     .notEmpty()
-    .withMessage('File path URL is required!'), // Ensure the URL is provided if present
+    .withMessage('File path URL is required!'),
 
   // Validate the optional 'cover_file_name' field
   body('cover_file_name')
     .optional() // Field is not required
     .isString()
-    .withMessage('File name must be a string!') // Ensure the name is a string
+    .withMessage('File name must be a string!')
     .notEmpty()
-    .withMessage('File name is required!') // Ensure the name is provided if present
+    .withMessage('File name is required!')
     .isLength({ min: 3, max: 50 })
-    .withMessage('File name must be between 3 and 50 characters.') // Ensure the name length is within limits
+    .withMessage('File name must be between 3 and 50 characters.')
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage(
       'File name can only contain letters, numbers, and underscores'
@@ -82,9 +82,9 @@ const validateUpdate = [
   body('user_id')
     .optional() // Field is not required
     .notEmpty()
-    .withMessage('User ID is required.') // Ensure the user ID is provided if present
+    .withMessage('User ID is required.')
     .isInt()
-    .withMessage('User ID must be an integer.'), // Ensure the user ID is a valid integer
+    .withMessage('User ID must be an integer.'),
 
   /**
    * Middleware to check for validation errors and respond accordingly.
@@ -102,7 +102,7 @@ const validateUpdate = [
 ];
 
 /**
- * Middleware to validate cover letter ID in URL parameters.
+ * Middleware to validate cover letter ID in req parameters.
  * Ensures that either `id` or `coverId` is provided as a valid integer.
  */
 const validationCoverLetterId = [
@@ -139,8 +139,41 @@ const validationCoverLetterId = [
   },
 ];
 
+/**
+ * Middleware to validate cover letter file name in parameters.
+ */
+const validationFileName = [
+  // Validate the 'name' field (file name of the cover letter)
+  param('name')
+    .isString()
+    .withMessage('File name must be a string!')
+    .notEmpty()
+    .withMessage('File name is required!')
+    .isLength({ min: 3, max: 50 })
+    .withMessage('File name must be between 3 and 50 characters.')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage(
+      'File name can only contain letters, numbers, and underscores'
+    ), // Ensure the name contains only allowed characters
+
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
 module.exports = {
   validateCoverLetter,
   validationCoverLetterId,
   validateUpdate,
+  validationFileName,
 };

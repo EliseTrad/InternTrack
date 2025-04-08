@@ -1,5 +1,5 @@
 const ApplicationsRepository = require('../repositories/applicationsRepository');
-const { NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 const UsersRepository = require('../repositories/usersRepository');
 const ResumesRepository = require('../repositories/resumesRepository');
 const CoverLettersRepository = require('../repositories/coverLettersRepository');
@@ -31,14 +31,20 @@ class ApplicationsService {
     try {
       // Validate related entities
       const { user_id, resume_id, cover_letter_id } = applicationData;
+
+      // user
       const userExists = await UsersRepository.getUserById(user_id);
       if (!userExists) {
         throw new NotFound(`User with ID ${user_id} not found.`);
       }
+
+      // resume
       const resumeExists = await ResumesRepository.getResumeById(resume_id);
       if (!resumeExists) {
         throw new NotFound(`Resume with ID ${resume_id} not found.`);
       }
+
+      // cover letter
       if (cover_letter_id) {
         const coverLetterExists =
           await CoverLettersRepository.getCoverLetterById(cover_letter_id);
@@ -360,6 +366,8 @@ class ApplicationsService {
         'Error in ApplicationsService while deleting application:',
         error
       );
+      if(error.name === 'SequelizeForeignKeyConstraintError')
+        throw new ConflictError();
       throw error;
     }
   }

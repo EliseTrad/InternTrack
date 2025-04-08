@@ -1,5 +1,4 @@
 const Resume = require('../models/Resume');
-const UsersRepository = require('../repositories/usersRepository');
 
 /**
  * ResumesRepository class provides methods to interact with the 'resumes' table in the database.
@@ -79,6 +78,22 @@ class ResumesRepository {
   static async getResumesByUserId(userId) {
     try {
       return await Resume.findAll({ where: { user_id: userId } });
+    } catch (error) {
+      console.error('Error fetching resume(s):', error);
+      throw error; // Propagate the error to the service layer
+    }
+  }
+
+  /**
+   * Retrieves all resumes associated with a specific file name.
+   *
+   * @param {number} name - The file name of the resumes to retrieve.
+   * @returns {Promise<Resume[]>} A list of resumes.
+   * @throws {Error} If there is an issue fetching the resumes.
+   */
+  static async getResumesByName(name) {
+    try {
+      return await Resume.findAll({ where: { resume_file_name: name } });
     } catch (error) {
       console.error('Error fetching resume(s):', error);
       throw error; // Propagate the error to the service layer

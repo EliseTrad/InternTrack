@@ -28,7 +28,8 @@ class ApplicationsRepository {
    *
    * @param {number} id - The ID of the application to update.
    * @param {Object} updateData - An object containing the fields to update.
-   * @returns {Promise<Object|null>} The updated application object if successful, or `null` if no rows were updated.
+   * @returns {Promise<Object|null>} The updated application object if successful,
+   *                                 or `null` if no rows were updated.
    * @throws {Error} If there is an issue with the database query.
    */
   static async updateApplicationById(id, updateData) {
@@ -68,6 +69,25 @@ class ApplicationsRepository {
   }
 
   /**
+   * Retrieves all applications from the database.
+   *
+   * @returns {Promise<Object[]>} A list of applications (empty array if none found).
+   * @throws {Error} If there is an issue fetching applications.
+   */
+  static async getAllApplications() {
+    try {
+      const applications = await Application.findAll();
+      return applications;
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsRepository while fetching all applications:',
+        error
+      );
+      throw new Error('Could not fetch applications.');
+    }
+  }
+
+  /**
    * Retrieves an application by its unique ID.
    *
    * @param {number} id - The unique ID of the application.
@@ -102,7 +122,7 @@ class ApplicationsRepository {
   /**
    * Retrieves applications by a specific status.
    *
-   * @param {string} status - The status of the application.
+   * @param {string} applicationStatus - The status of the application.
    * @returns {Promise<Application[]>} A list of applications (empty array if none found).
    * @throws {Error} If there is an issue fetching the applications.
    */

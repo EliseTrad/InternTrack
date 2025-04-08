@@ -1,7 +1,7 @@
 const UsersRepository = require('../repositories/usersRepository');
 const {
   NotFound,
-  UserConflictError,
+  ConflictError,
   EmailAlreadyExistsError,
   NameAlreadyExistsError,
   InvalidPassword,
@@ -21,21 +21,21 @@ class UserService {
    * @param {string} userData.user_email - The email of the user.
    * @param {string} userData.user_password - The password of the user (will be hashed automatically).
    * @param {string|null} [userData.profile_picture] - Optional profile picture URL.
-   * @param {Date} [userData.account_created_date] - Optional creation date (defaults to current date).
    * @returns {Promise<User>} The created user object.
    * @throws {EmailAlreadyExistsError} If the email is already in use.
    * @throws {NameAlreadyExistsError} If the username is already in use.
    */
-  static async createUser({
+  static async registerUser({
     user_name,
     user_email,
     user_password,
     profile_picture = null,
-    account_created_date = new Date(),
   }) {
     try {
       // Check if the email is already in use
-      const existingUserByEmail = await UsersRepository.getUserByEmail(user_email);
+      const existingUserByEmail = await UsersRepository.getUserByEmail(
+        user_email
+      );
       if (existingUserByEmail) throw new EmailAlreadyExistsError();
 
       // Check if the username is already in use
@@ -48,7 +48,6 @@ class UserService {
         user_email,
         user_password,
         profile_picture,
-        account_created_date,
       });
     } catch (error) {
       console.error('Error in usersService while creating user:', error);
@@ -69,6 +68,24 @@ class UserService {
       // Check if the user exists
       const existingUser = await UsersRepository.getUserById(id);
       if (!existingUser) throw new NotFound(`User with ID ${id} not found.`);
+
+      // Check if the email is already taken
+      if (updateData.user_email) {
+        const existingEmail = await UsersRepository.getUserByEmail(
+          updateData.user_email
+        );
+        if (existingEmail && existingUser.user_email != updateData.user_email)
+          throw new EmailAlreadyExistsError();
+      }
+
+      // Check if the user name is already taken
+      if (updateData.user_name) {
+        const existingName = await UsersRepository.getUserByName(
+          updateData.user_name
+        );
+        if (existingName && existingUser.user_name != updateData.user_name)
+          throw new NameAlreadyExistsError();
+      }
 
       // Update the user in the repository
       return await UsersRepository.updateUserById(id, updateData);
@@ -121,10 +138,13 @@ class UserService {
   static async getUserByName(name) {
     try {
       const user = await UsersRepository.getUserByName(name);
-      if (!user) throw new NotFound(`User with name "${name}" not found.`);
+      if (!user) throw new NotFound(`User with name ${name} not found.`);
       return user;
     } catch (error) {
-      console.error('Error in usersService while fetching user by name:', error);
+      console.error(
+        'Error in usersService while fetching user by name:',
+        error
+      );
       throw error; // Propagate the error to the controller
     }
   }
@@ -139,10 +159,13 @@ class UserService {
   static async getUserByEmail(email) {
     try {
       const user = await UsersRepository.getUserByEmail(email);
-      if (!user) throw new NotFound(`User with email "${email}" not found.`);
+      if (!user) throw new NotFound(`User with email ${email} not found.`);
       return user;
     } catch (error) {
-      console.error('Error in usersService while fetching user by email:', error);
+      console.error(
+        'Error in usersService while fetching user by email:',
+        error
+      );
       throw error; // Propagate the error to the controller
     }
   }
@@ -160,7 +183,7 @@ class UserService {
     try {
       // Fetch the user by username
       const user = await UsersRepository.getUserByName(name);
-      if (!user) throw new NotFound(`User with name "${name}" not found.`);
+      if (!user) throw new NotFound(`User with name ${name} not found.`);
 
       // Validate the password
       const isPasswordValid = await user.validPassword(password);
@@ -179,7 +202,7 @@ class UserService {
    * @param {number} id - The ID of the user to delete.
    * @returns {Promise<boolean>} True if the user was successfully deleted.
    * @throws {NotFound} If the user with the given ID is not found.
-   * @throws {UserConflictError} If the user is referenced in other records.
+   * @throws {ConflictError} If the user is referenced in other records.
    */
   static async deleteUser(id) {
     try {
@@ -196,7 +219,7 @@ class UserService {
 
       // Handle foreign key constraint errors
       if (error.name === 'SequelizeForeignKeyConstraintError') {
-        throw new UserConflictError();
+        throw new ConflictError();
       }
 
       throw error; // Propagate other errors to the controller

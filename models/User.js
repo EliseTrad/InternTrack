@@ -67,7 +67,7 @@ User.init(
     timestamps: false, // Disables automatic createdAt and updatedAt fields
 
     /**
-     * Hooks (Lifecycle Events)
+     * Hooks
      */
     hooks: {
       /**
@@ -78,7 +78,8 @@ User.init(
       beforeCreate: async (user) => {
         if (user.user_password) {
           // Ensure password exists before hashing
-          user.user_password = await bcrypt.hash(user.user_password, 10); // Hash the password with a salt round of 10
+          // Hash the password with a salt round of 10
+          user.user_password = await bcrypt.hash(user.user_password, 10);
         }
       },
 

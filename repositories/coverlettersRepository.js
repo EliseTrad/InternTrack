@@ -85,6 +85,22 @@ class CoverLettersRepository {
   }
 
   /**
+   * Retrieves all cover letters with a specific file name.
+   *
+   * @param {String} name - The file name of the cover letters to retrieve.
+   * @returns {Promise<CoverLetter[]>} A list of cover letters.
+   * @throws {Error} If there is an issue fetching the cover letters.
+   */
+  static async getCoverLetterByName(name) {
+    try {
+      return await CoverLetter.findAll({ where: { cover_file_name: name } });
+    } catch (error) {
+      console.error('Error fetching cover letters:', error);
+      throw error; // Propagate the error to the service layer
+    }
+  }
+
+  /**
    * Retrieves a cover letter by its unique ID.
    *
    * @param {number} id - The unique ID of the cover letter.

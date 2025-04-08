@@ -179,7 +179,7 @@ const validationUserId = [
 ];
 
 /**
- * Validates the user's name in the request body or parameters.
+ * Validates the user's name in the request parameters.
  * @returns {Array} The validation middleware for the user's name.
  */
 const validationName = [
@@ -209,12 +209,12 @@ const validationName = [
 ];
 
 /**
- * Validates the user's email in the request body or parameters.
+ * Validates the user's email in the request parameters.
  * @returns {Array} The validation middleware for the user's email.
  */
 const validationEmail = [
   param('email')
-    .normalizeEmail() // Normalize email format (e.g., convert to lowercase)
+    .normalizeEmail() // Normalize email format
     .isEmail()
     .withMessage('Email must be valid!')
     .notEmpty()
@@ -237,10 +237,61 @@ const validationEmail = [
   },
 ];
 
+/**
+ * Validates the user login input (username and password).
+ * Ensures both fields are provided before proceeding.
+ * @returns {Function} Express middleware to validate authentication body.
+ */
+const validateAuthentication = [
+  // Validate the 'name' field
+  body('name')
+    .trim() // Remove leading/trailing whitespace
+    .isString()
+    .withMessage('Name must be a string!')
+    .notEmpty()
+    .withMessage('Name is required!')
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters.')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+
+  // Validate the 'password' field
+  body('password')
+    .isString()
+    .withMessage('Password must be a string!')
+    .isLength({ min: 8, max: 20 })
+    .withMessage('Password must be between 8 and 20 characters.')
+    .isStrongPassword({
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    })
+    .withMessage(
+      'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol.'
+    ),
+
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
 module.exports = {
   validateUser,
   validationUserId,
   validationEmail,
   validationName,
   validateUpdate,
+  validateAuthentication,
 };

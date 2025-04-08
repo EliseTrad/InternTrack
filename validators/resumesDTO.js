@@ -8,20 +8,20 @@ const validateResume = [
   // Validate the 'path' field (URL of the resume file)
   body('path')
     .isURL()
-    .withMessage('Invalid file path URL') // Ensure the URL is valid
+    .withMessage('Invalid file path URL')
     .isLength({ max: 600 })
-    .withMessage('File path URL is too long!') // Ensure the URL is not excessively long
+    .withMessage('File path URL is too long!')
     .notEmpty()
-    .withMessage('File path URL is required!'), // Ensure the URL is provided
+    .withMessage('File path URL is required!'),
 
   // Validate the 'name' field (file name of the resume)
   body('name')
     .isString()
-    .withMessage('File name must be a string!') // Ensure the name is a string
+    .withMessage('File name must be a string!')
     .notEmpty()
-    .withMessage('File name is required!') // Ensure the name is provided
+    .withMessage('File name is required!')
     .isLength({ min: 3, max: 50 })
-    .withMessage('File name must be between 3 and 50 characters.') // Ensure the name length is within limits
+    .withMessage('File name must be between 3 and 50 characters.')
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage(
       'File name can only contain letters, numbers, and underscores'
@@ -30,9 +30,9 @@ const validateResume = [
   // Validate the 'userId' field (ID of the user associated with the resume)
   body('userId')
     .notEmpty()
-    .withMessage('User ID is required.') // Ensure the user ID is provided
+    .withMessage('User ID is required.')
     .isInt()
-    .withMessage('User ID must be an integer.'), // Ensure the user ID is a valid integer
+    .withMessage('User ID must be an integer.'),
 
   /**
    * Middleware to check for validation errors and respond accordingly.
@@ -55,36 +55,36 @@ const validateResume = [
  */
 const validateUpdate = [
   // Validate the optional 'path' field
-  body('path')
+  body('resume_file_path')
     .optional() // Field is not required
     .isURL()
-    .withMessage('Invalid file path URL') // Ensure the URL is valid
+    .withMessage('Invalid file path URL')
     .isLength({ max: 600 })
-    .withMessage('File path URL is too long!') // Ensure the URL is not excessively long
+    .withMessage('File path URL is too long!')
     .notEmpty()
-    .withMessage('File path URL is required!'), // Ensure the URL is provided if present
+    .withMessage('File path URL is required!'),
 
   // Validate the optional 'name' field
-  body('name')
+  body('resume_file_name')
     .optional() // Field is not required
     .isString()
-    .withMessage('File name must be a string!') // Ensure the name is a string
+    .withMessage('File name must be a string!')
     .notEmpty()
-    .withMessage('File name is required!') // Ensure the name is provided if present
+    .withMessage('File name is required!')
     .isLength({ min: 3, max: 50 })
-    .withMessage('File name must be between 3 and 50 characters.') // Ensure the name length is within limits
+    .withMessage('File name must be between 3 and 50 characters.')
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage(
       'File name can only contain letters, numbers, and underscores'
-    ), // Ensure the name contains only allowed characters
+    ),
 
   // Validate the optional 'userId' field
-  body('userId')
-    .optional() // Field is not required
+  body('user_id')
+    .optional()
     .notEmpty()
-    .withMessage('User ID is required.') // Ensure the user ID is provided if present
+    .withMessage('User ID is required.')
     .isInt()
-    .withMessage('User ID must be an integer.'), // Ensure the user ID is a valid integer
+    .withMessage('User ID must be an integer.'),
 
   /**
    * Middleware to check for validation errors and respond accordingly.
@@ -111,18 +111,50 @@ const validationResumeId = [
     [
       param('id')
         .isInt()
-        .withMessage('ID must be an integer.') // Ensure 'id' is a valid integer
+        .withMessage('ID must be an integer.')
         .notEmpty()
-        .withMessage('ID is required.'), // Ensure 'id' is provided
+        .withMessage('ID is required.'),
 
       param('resumeId')
         .isInt()
-        .withMessage('Resume ID must be an integer.') // Ensure 'resumeId' is a valid integer
+        .withMessage('Resume ID must be an integer.')
         .notEmpty()
-        .withMessage('Resume ID is required.'), // Ensure 'resumeId' is provided
+        .withMessage('Resume ID is required.'),
     ],
     "Either 'id' or 'resumeId' must be provided as a valid integer."
   ),
+
+  /**
+   * Middleware to check for validation errors and respond accordingly.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @param {function} next - The next middleware function.
+   */
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
+/**
+ * Middleware to validate file name in req parameters.
+ */
+const validationName = [
+  // Validate the 'name' field (file name of the resume)
+  param('name')
+    .isString()
+    .withMessage('File name must be a string!')
+    .notEmpty()
+    .withMessage('File name is required!')
+    .isLength({ min: 3, max: 50 })
+    .withMessage('File name must be between 3 and 50 characters.')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage(
+      'File name can only contain letters, numbers, and underscores'
+    ), // Ensure the name contains only allowed characters
 
   /**
    * Middleware to check for validation errors and respond accordingly.
@@ -143,4 +175,5 @@ module.exports = {
   validateResume,
   validationResumeId,
   validateUpdate,
+  validationName,
 };

@@ -1,5 +1,5 @@
 const CoverLettersRepository = require('../repositories/coverLettersRepository');
-const { NotFound } = require('../errors/customError');
+const { NotFound, ConflictError } = require('../errors/customError');
 const UsersRepository = require('../repositories/usersRepository');
 
 /**
@@ -13,8 +13,6 @@ class CoverLettersService {
    * @param {Object} coverLetterData - The data for the new cover letter.
    * @param {string} coverLetterData.cover_file_path - The file path (URL) of the cover letter.
    * @param {string} coverLetterData.cover_file_name - The file name of the cover letter.
-   * @param {Date} [coverLetterData.cover_upload_date] - The upload date of the cover letter
-   *                                                    (defaults to current date).
    * @param {number} coverLetterData.user_id - The ID of the user associated with the cover letter.
    * @returns {Promise<Object>} The created cover letter object.
    * @throws {Error} If there is an issue creating the cover letter.
@@ -22,14 +20,12 @@ class CoverLettersService {
   static async createCoverLetter({
     cover_file_path,
     cover_file_name,
-    cover_upload_date = new Date(),
     user_id,
   }) {
     try {
       return await CoverLettersRepository.createCoverLetter({
         cover_file_path,
         cover_file_name,
-        cover_upload_date,
         user_id,
       });
     } catch (error) {
@@ -130,6 +126,27 @@ class CoverLettersService {
   }
 
   /**
+   * Retrieves all cover letters with a specific file name.
+   *
+   * @param {String} name - The file name of the cover letters to retrieve.
+   * @returns {Promise<CoverLetter[]>} A list of cover letters.
+   * @throws {Error} If there is an issue fetching the cover letters.
+   */
+  static async getCoverLettersByName(name) {
+    try {
+      const cover = await CoverLettersRepository.getCoverLetterByName(name);
+      if (!cover) throw NotFound(`No cover with name ${name} is found`);
+      return cover;
+    } catch (error) {
+      console.error(
+        'Error in CoverLettersService while fetching cover letters by name:',
+        error
+      );
+      throw error; // Propagate the error to the controller
+    }
+  }
+
+  /**
    * Retrieves a cover letter by its unique ID.
    *
    * @param {number} id - The unique ID of the cover letter.
@@ -175,6 +192,12 @@ class CoverLettersService {
         'Error in CoverLettersService while deleting cover letter:',
         error
       );
+
+      // Handle foreign key constraint errors
+      if (error.name === 'SequelizeForeignKeyConstraintError') {
+        throw new ConflictError();
+      }
+
       throw error; // Propagate the error to the controller
     }
   }

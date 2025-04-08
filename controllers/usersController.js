@@ -1,7 +1,7 @@
 const UserService = require('../services/usersService');
 const {
   NotFound,
-  UserConflictError,
+  ConflictError,
   EmailAlreadyExistsError,
   NameAlreadyExistsError,
   InvalidPassword,
@@ -29,7 +29,7 @@ class UsersController {
       const { name, email, password, profile } = req.body;
 
       // Call the service to create the user
-      const newUser = await UserService.createUser({
+      const newUser = await UserService.registerUser({
         user_name: name,
         user_email: email,
         user_password: password,
@@ -70,8 +70,12 @@ class UsersController {
       res.status(200).json(updatedUser); // OK
     } catch (error) {
       // Handle specific errors and return appropriate status codes
-      if (error instanceof NotFound) {
-        res.status(404).json({ message: error.message });
+      if (
+        error instanceof NotFound ||
+        error instanceof EmailAlreadyExistsError ||
+        error instanceof NameAlreadyExistsError
+      ) {
+        res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'Could not update the user.' });
       }
@@ -195,10 +199,7 @@ class UsersController {
       res.status(200).json(user); // OK
     } catch (error) {
       // Handle specific errors and return appropriate status codes
-      if (
-        error instanceof NotFound ||
-        error instanceof InvalidPassword
-      ) {
+      if (error instanceof NotFound || error instanceof InvalidPassword) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
@@ -228,10 +229,7 @@ class UsersController {
       }
     } catch (error) {
       // Handle specific errors and return appropriate status codes
-      if (
-        error instanceof NotFound ||
-        error instanceof UserConflictError
-      ) {
+      if (error instanceof NotFound || error instanceof ConflictError) {
         res.status(error.statusCode).json({ message: error.message });
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });

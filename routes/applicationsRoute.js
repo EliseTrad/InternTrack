@@ -19,7 +19,7 @@ router.post('/create', validateApplication, (req, res) =>
 
 // update application
 router.put(
-  '/update/:id', validationUpdate,
+  '/update/:id', validationUpdate, validationApplicationId,
   (req, res) => ApplicationsController.updateApplicationById(req, res)
 );
 
@@ -69,7 +69,7 @@ router.get('/source/:source', (req, res) =>
 );
 
 // get applications by resume id
-router.get('/resume/:resumeId', validationResumeId, (req, res) =>
+router.get('/resume/:id', validationResumeId, (req, res) =>
   ApplicationsController.getApplicationsByResumeId(req, res)
 );
 
