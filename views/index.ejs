@@ -1,0 +1,142 @@
+<% var loginError = typeof loginError !== 'undefined' ? loginError : null; var
+registerError = typeof registerError !== 'undefined' ? registerError : null; var
+formData = typeof formData !== 'undefined' ? formData : {}; var activeTab =
+typeof activeTab !== 'undefined' ? activeTab : 'login'; %> <%-
+include('partials/header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interntracker - never miss an opportunity</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="/css/style.css" rel="stylesheet" />
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <ul class="nav nav-tabs" id="authTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link <%= activeTab === 'login' ? 'active' : '' %>"
+            id="login-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#login"
+            type="button"
+            role="tab"
+          >
+            Login
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link <%= activeTab === 'register' ? 'active' : '' %>"
+            id="register-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#register"
+            type="button"
+            role="tab"
+          >
+            Register
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-3" id="authTabsContent">
+        <!-- Login Form -->
+        <div
+          class="tab-pane fade <%= activeTab === 'login' ? 'show active' : '' %>"
+          id="login"
+          role="tabpanel"
+        >
+          <% if (loginError) { %>
+          <div class="alert alert-danger" role="alert"><%= loginError %></div>
+          <% } %>
+
+          <form action="/users/authenticate" method="POST">
+            <div class="mb-3">
+              <label for="loginName" class="form-label">Username</label>
+              <input
+                type="text"
+                name="name"
+                class="form-control"
+                id="loginName"
+                value="<%= formData.name || '' %>"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label">Password</label>
+              <input
+                type="password"
+                name="password"
+                class="form-control"
+                id="loginPassword"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+        </div>
+
+        <!-- Register Form -->
+        <div
+          class="tab-pane fade <%= activeTab === 'register' ? 'show active' : '' %>"
+          id="register"
+          role="tabpanel"
+        >
+          <% if (registerError) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= registerError %>
+          </div>
+          <% } %>
+
+          <form action="/users/register" method="POST">
+            <div class="mb-3">
+              <label for="regName" class="form-label">Username</label>
+              <input
+                type="text"
+                name="name"
+                class="form-control"
+                id="regName"
+                value="<%= formData.name || '' %>"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="regEmail" class="form-label">Email</label>
+              <input
+                type="email"
+                name="email"
+                class="form-control"
+                id="regEmail"
+                value="<%= formData.email || '' %>"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="regPassword" class="form-label">Password</label>
+              <input
+                type="password"
+                name="password"
+                class="form-control"
+                id="regPassword"
+                required
+              />
+            </div>
+
+            <button type="submit" class="btn btn-success">Register</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+
+<%- include('partials/footer') %>

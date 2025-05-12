@@ -5,9 +5,8 @@ const { body, param, validationResult, oneOf } = require('express-validator');
  * @returns {Array} The validation middleware for user creation.
  */
 const validateUser = [
-  // Validate the 'name' field
   body('name')
-    .trim() // Remove leading/trailing whitespace
+    .trim()
     .isString()
     .withMessage('Name must be a string!')
     .notEmpty()
@@ -17,10 +16,9 @@ const validateUser = [
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('Username can only contain letters, numbers, and underscores'),
 
-  // Validate the 'email' field
   body('email')
-    .trim() // Remove leading/trailing whitespace
-    .normalizeEmail() // Normalize email format (e.g., convert to lowercase)
+    .trim()
+    .normalizeEmail()
     .isEmail()
     .withMessage('Email must be valid!')
     .notEmpty()
@@ -28,7 +26,6 @@ const validateUser = [
     .isLength({ max: 100 })
     .withMessage('Email cannot exceed 100 characters.'),
 
-  // Validate the 'password' field
   body('password')
     .isString()
     .withMessage('Password must be a string!')
@@ -45,24 +42,19 @@ const validateUser = [
       'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol.'
     ),
 
-  // Validate the optional 'profile' field
   body('profile')
-    .optional() // Field is not required
+    .optional()
     .isURL()
     .withMessage('Profile picture URL must be a valid URL.')
     .isLength({ max: 600 })
     .withMessage('Profile picture URL cannot exceed 600 characters.'),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors.array(); // Store errors in req.errors for rendering
+      return next(); // Pass to the next middleware for rendering
     }
     next();
   },
@@ -74,9 +66,8 @@ const validateUser = [
  * @returns {Array} The validation middleware for user updates.
  */
 const validateUpdate = [
-  // Validate the optional 'user_name' field
   body('user_name')
-    .optional() // Field is not required
+    .optional()
     .trim()
     .isString()
     .withMessage('Name must be a string!')
@@ -87,9 +78,8 @@ const validateUpdate = [
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('Username can only contain letters, numbers, and underscores'),
 
-  // Validate the optional 'user_email' field
   body('user_email')
-    .optional() // Field is not required
+    .optional()
     .trim()
     .normalizeEmail()
     .isEmail()
@@ -99,9 +89,8 @@ const validateUpdate = [
     .isLength({ max: 100 })
     .withMessage('Email cannot exceed 100 characters.'),
 
-  // Validate the optional 'user_password' field
   body('user_password')
-    .optional() // Field is not required
+    .optional()
     .isString()
     .withMessage('Password must be a string!')
     .isLength({ min: 8, max: 20 })
@@ -117,24 +106,22 @@ const validateUpdate = [
       'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol.'
     ),
 
-  // Validate the optional 'profile_picture' field
   body('profile_picture')
-    .optional() // Field is not required
+    .optional()
     .isURL()
     .withMessage('Profile picture URL must be a valid URL.')
     .isLength({ max: 600 })
     .withMessage('Profile picture URL cannot exceed 600 characters.'),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors
+        .array()
+        .map((e) => e.msg)
+        .join(' ');
+      return next();
     }
     next();
   },
@@ -145,7 +132,6 @@ const validateUpdate = [
  * @returns {Array} The validation middleware for user ID.
  */
 const validationUserId = [
-  // Validate either 'id' or 'userId' in route parameters
   oneOf(
     [
       param('id')
@@ -163,16 +149,12 @@ const validationUserId = [
     "Either 'id' or 'userId' must be provided as a valid integer."
   ),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors.array(); // Store errors in req.errors for rendering
+      return next(); // Pass to the next middleware for rendering
     }
     next();
   },
@@ -193,16 +175,12 @@ const validationName = [
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('Username can only contain letters, numbers, and underscores'),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors.array(); // Store errors in req.errors for rendering
+      return next(); // Pass to the next middleware for rendering
     }
     next();
   },
@@ -214,7 +192,7 @@ const validationName = [
  */
 const validationEmail = [
   param('email')
-    .normalizeEmail() // Normalize email format
+    .normalizeEmail()
     .isEmail()
     .withMessage('Email must be valid!')
     .notEmpty()
@@ -222,16 +200,12 @@ const validationEmail = [
     .isLength({ max: 100 })
     .withMessage('Email cannot exceed 100 characters.'),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors.array(); // Store errors in req.errors for rendering
+      return next(); // Pass to the next middleware for rendering
     }
     next();
   },
@@ -239,13 +213,11 @@ const validationEmail = [
 
 /**
  * Validates the user login input (username and password).
- * Ensures both fields are provided before proceeding.
  * @returns {Function} Express middleware to validate authentication body.
  */
 const validateAuthentication = [
-  // Validate the 'name' field
   body('name')
-    .trim() // Remove leading/trailing whitespace
+    .trim()
     .isString()
     .withMessage('Name must be a string!')
     .notEmpty()
@@ -255,7 +227,6 @@ const validateAuthentication = [
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('Username can only contain letters, numbers, and underscores'),
 
-  // Validate the 'password' field
   body('password')
     .isString()
     .withMessage('Password must be a string!')
@@ -272,16 +243,12 @@ const validateAuthentication = [
       'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol.'
     ),
 
-  /**
-   * Middleware to check for validation errors and respond accordingly.
-   * @param {Object} req - The request object.
-   * @param {Object} res - The response object.
-   * @param {function} next - The next middleware function.
-   */
+  // Middleware to handle validation errors and respond accordingly
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      req.errors = errors.array(); // Store errors in req.errors for rendering
+      return next(); // Pass to the next middleware for rendering
     }
     next();
   },

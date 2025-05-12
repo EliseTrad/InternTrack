@@ -36,16 +36,23 @@ class UsersController {
         profile_picture: profile,
       });
 
-      res.status(201).json(newUser); // Created
+      res.status(201).json({
+        success: true,
+        user: newUser,
+      }); // Created
     } catch (error) {
       // Handle specific errors and return appropriate status codes
       if (
         error instanceof EmailAlreadyExistsError ||
         error instanceof NameAlreadyExistsError
       ) {
-        res.status(error.statusCode).json({ message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
       } else {
-        res.status(500).json({ message: 'An unexpected error occurred.' });
+        res
+          .status(500)
+          .json({ success: false, message: 'An unexpected error occurred.' });
       }
     }
   }
@@ -62,23 +69,38 @@ class UsersController {
   static async updateUserById(req, res) {
     try {
       const { id } = req.params;
-      const updateData = req.body;
+      const updateData = {
+        ...req.body,
+      };
 
-      // Call the service to update the user
+      // Handle profile picture if uploaded
+      if (req.file) {
+        updateData.profile_picture = `/uploads/users/${req.file.filename}`;
+      }
+
       const updatedUser = await UserService.updateUserById(id, updateData);
 
-      res.status(200).json(updatedUser); // OK
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully.',
+        user: updatedUser,
+      });
     } catch (error) {
-      // Handle specific errors and return appropriate status codes
+      console.error('Error in updateUserById controller:', error);
+
+      let status = 500;
+      let message = 'Could not update user.';
+
       if (
-        error instanceof NotFound ||
         error instanceof EmailAlreadyExistsError ||
-        error instanceof NameAlreadyExistsError
+        error instanceof NameAlreadyExistsError ||
+        error instanceof InvalidPassword
       ) {
-        res.status(error.statusCode).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: 'Could not update the user.' });
+        status = error.statusCode || 400;
+        message = error.message;
       }
+
+      return res.status(status).json({ success: false, message });
     }
   }
 
@@ -196,13 +218,20 @@ class UsersController {
       // Call the service to authenticate the user
       const user = await UserService.authenticate(name, password);
 
-      res.status(200).json(user); // OK
+      res.status(200).json({
+        success: true,
+        user,
+      }); // OK
     } catch (error) {
       // Handle specific errors and return appropriate status codes
       if (error instanceof NotFound || error instanceof InvalidPassword) {
-        res.status(error.statusCode).json({ message: error.message });
+        res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
       } else {
-        res.status(500).json({ message: 'An unexpected error occurred.' });
+        res
+          .status(500)
+          .json({ success: false, message: 'An unexpected error occurred.' });
       }
     }
   }

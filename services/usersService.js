@@ -1,4 +1,5 @@
 const UsersRepository = require('../repositories/usersRepository');
+const User = require('../models/User');
 const {
   NotFound,
   ConflictError,
@@ -6,7 +7,6 @@ const {
   NameAlreadyExistsError,
   InvalidPassword,
 } = require('../errors/customError');
-
 /**
  * UserService class provides business logic for user-related operations.
  * Each method interacts with the UsersRepository to perform CRUD operations on users.
@@ -65,33 +65,51 @@ class UserService {
    */
   static async updateUserById(id, updateData) {
     try {
-      // Check if the user exists
       const existingUser = await UsersRepository.getUserById(id);
       if (!existingUser) throw new NotFound(`User with ID ${id} not found.`);
 
-      // Check if the email is already taken
+      const updates = {}; // Only include what we want to update
+
+      // Email check
       if (updateData.user_email) {
         const existingEmail = await UsersRepository.getUserByEmail(
           updateData.user_email
         );
-        if (existingEmail && existingUser.user_email != updateData.user_email)
+        if (existingEmail && existingEmail.user_id !== id) {
           throw new EmailAlreadyExistsError();
+        }
+        updates.user_email = updateData.user_email;
       }
 
-      // Check if the user name is already taken
+      // Name check
       if (updateData.user_name) {
         const existingName = await UsersRepository.getUserByName(
           updateData.user_name
         );
-        if (existingName && existingUser.user_name != updateData.user_name)
+        if (existingName && existingName.user_id !== id) {
           throw new NameAlreadyExistsError();
+        }
+        updates.user_name = updateData.user_name;
       }
 
-      // Update the user in the repository
-      return await UsersRepository.updateUserById(id, updateData);
+      // Password change
+      if (updateData.old_password && updateData.new_password) {
+        const isValid = existingUser.validPassword(updateData.old_password);
+        if (!isValid) throw new InvalidPassword('Old password is incorrect.');
+
+        updates.user_password = updateData.new_password; // hook is responsible for the hashing
+      }
+
+      // Profile picture
+      if (updateData.profile_picture) {
+        updates.profile_picture = updateData.profile_picture;
+      }
+
+      // Final update
+      return await UsersRepository.updateUserById(id, updates);
     } catch (error) {
       console.error('Error in UsersService while updating user:', error);
-      throw error; // Propagate the error to the controller
+      throw error;
     }
   }
 

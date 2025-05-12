@@ -15,6 +15,11 @@ class User extends Model {
   validPassword(password) {
     return bcrypt.compareSync(password, this.user_password);
   }
+
+  static hashPassword(plainPassword) {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(plainPassword, salt);
+  }
 }
 
 /**
