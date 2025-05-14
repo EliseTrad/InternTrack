@@ -87,7 +87,7 @@ class ResumesRepository {
   /**
    * Retrieves all resumes associated with a specific file name.
    *
-   * @param {number} name - The file name of the resumes to retrieve.
+   * @param {string} name - The file name of the resumes to retrieve.
    * @returns {Promise<Resume[]>} A list of resumes.
    * @throws {Error} If there is an issue fetching the resumes.
    */
@@ -133,7 +133,15 @@ class ResumesRepository {
     }
   }
 
+  /**
+   * Deletes multiple resumes for a given user.
+   *
+   * @param {number} userId - The ID of the user.
+   * @param {Array<number>} resumeIds - An array of resume IDs to delete.
+   * @returns {Promise<number>} The number of records deleted.
+   */
   static async deleteResumesByUser(userId, resumeIds) {
+    // Executes bulk deletion for specified resume IDs
     return await Resume.destroy({
       where: {
         user_id: userId,
@@ -142,6 +150,14 @@ class ResumesRepository {
     });
   }
 
+  /**
+   * Retrieves a single resume by name and user ID.
+   *
+   * @param {string} name - The file name to search by.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Resume|null>} The matching resume or null.
+   * @throws {Error} If there is an issue during the fetch.
+   */
   static async getResumesByNameAndUserId(name, userId) {
     try {
       const resume = await Resume.findOne({
@@ -157,7 +173,7 @@ class ResumesRepository {
         'Error in ResumesRepository.getResumesByNameAndUserId:',
         error
       );
-      throw error;
+      throw error; // Propagate the error to the service layer
     }
   }
 }

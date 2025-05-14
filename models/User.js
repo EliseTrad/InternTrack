@@ -16,6 +16,11 @@ class User extends Model {
     return bcrypt.compareSync(password, this.user_password);
   }
 
+  /**
+   * Generates a salted hash for a plain-text password.
+   * @param {string} plainPassword - The plain-text password to be hashed.
+   * @returns {string} - The resulting hashed password string.
+   */
   static hashPassword(plainPassword) {
     const salt = bcrypt.genSaltSync(10);
     return bcrypt.hashSync(plainPassword, salt);

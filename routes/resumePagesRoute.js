@@ -3,6 +3,11 @@ const router = express.Router();
 const ResumesService = require('../services/resumesService');
 const uploadResume = require('../middleware/uploadResume');
 
+/**
+ * Helper to map raw resume records to view-friendly objects and sort by uploadDate descending.
+ * @param {Object|Object[]} raw - Single resume object or array of resume objects from DB
+ * @returns {Array<{id: number, name: string, path: string, uploadDate: string}>}
+ */
 function mapAndSortResumes(raw) {
   const arr = Array.isArray(raw) ? raw : [raw];
   const mapped = arr.map(r => ({
@@ -11,12 +16,18 @@ function mapAndSortResumes(raw) {
     path: r.resume_file_path,
     uploadDate: r.resume_upload_date,
   }));
+  // Sort newest first
   return mapped.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
 }
 
-
+/**
+ * @route   GET /resumes
+ * @desc    Display list of user resumes
+ * @access  Private
+ */
 router.get('/resumes', async (req, res) => {
   if (!req.session.user) {
+    // Redirect unauthenticated users to home page
     return res.redirect('/');
   }
 
@@ -24,6 +35,7 @@ router.get('/resumes', async (req, res) => {
     const userId = req.session.user.id;
     const rawResumes = await ResumesService.getResumesByUserId(userId);
 
+    // Map and sort resumes for view
     const resumes = mapAndSortResumes(rawResumes);
 
     res.render('resumes', {
@@ -41,8 +53,15 @@ router.get('/resumes', async (req, res) => {
   }
 });
 
+/**
+ * @route   POST /upload
+ * @desc    Upload a new resume file
+ * @access  Private
+ * @middleware uploadResume - multer upload handler
+ */
 router.post('/upload', uploadResume, async (req, res) => {
   if (!req.session || !req.session.user) {
+    // Redirect if session missing or expired
     return res.redirect('/');
   }
 
@@ -54,7 +73,7 @@ router.post('/upload', uploadResume, async (req, res) => {
     const rawResumes = await ResumesService.getResumesByUserId(userId);
     const resumes = mapAndSortResumes(rawResumes);
 
-    // Check if multer caught an error
+    // Check if multer reported an upload error
     if (req.uploadError) {
       return res.render('resumes', {
         resumes,
@@ -65,6 +84,7 @@ router.post('/upload', uploadResume, async (req, res) => {
 
     const file = req.file;
     if (!file) {
+      // No file uploaded
       return res.render('resumes', {
         resumes,
         error: 'No file uploaded.',
@@ -72,13 +92,14 @@ router.post('/upload', uploadResume, async (req, res) => {
       });
     }
 
-    // Save the uploaded resume
+    // Save the uploaded resume record in database
     await ResumesService.createResume({
       resume_file_path: `uploads/resumes/${file.filename}`,
       resume_file_name: file.originalname,
       user_id: userId,
     });
 
+    // Fetch updated list of resumes
     const updatedRaw = await ResumesService.getResumesByUserId(userId);
     const updatedResumes = mapAndSortResumes(updatedRaw);
 
@@ -97,7 +118,13 @@ router.post('/upload', uploadResume, async (req, res) => {
   }
 });
 
-// Rename resume
+/**
+ * @route   POST /rename
+ * @desc    Rename an existing resume
+ * @access  Private
+ * @param   {string} req.body.resumeId - ID of resume to rename
+ * @param   {string} req.body.newName - New display name for resume
+ */
 router.post('/rename', async (req, res) => {
   if (!req.session || !req.session.user) {
     return res.redirect('/');
@@ -108,7 +135,9 @@ router.post('/rename', async (req, res) => {
     const { resumeId, newName } = req.body;
 
     if (!newName || !resumeId) {
-      const resumes = await ResumesService.getResumesByUserId(userId);
+      // Require both resumeId and newName
+      const rawResumes = await ResumesService.getResumesByUserId(userId);
+      const resumes = mapAndSortResumes(rawResumes);
       return res.render('resumes', {
         resumes,
         error: 'Resume name is required.',
@@ -116,13 +145,13 @@ router.post('/rename', async (req, res) => {
       });
     }
 
-    // Call the service to update the resume
+    // Update the resume name in the database
     await ResumesService.updateResumeById(resumeId, {
       resume_file_name: newName,
       user_id: userId,
     });
 
-    // After renaming, fetch the updated list of resumes and render the page
+    // Fetch updated resumes list after rename
     const rawResumes = await ResumesService.getResumesByUserId(userId);
     const updatedResumes = mapAndSortResumes(rawResumes);
 
@@ -133,6 +162,7 @@ router.post('/rename', async (req, res) => {
     });
   } catch (err) {
     console.error('Error while renaming resume:', err);
+    
     const rawResumes = await ResumesService.getResumesByUserId(
       req.session.user.id
     );
@@ -146,7 +176,12 @@ router.post('/rename', async (req, res) => {
   }
 });
 
-// Delete selected resumes
+/**
+ * @route   POST /delete
+ * @desc    Delete selected resumes
+ * @access  Private
+ * @param   {string[]} req.body.resumeIds - Array of resume IDs to delete
+ */
 router.post('/delete', async (req, res) => {
   if (!req.session || !req.session.user) {
     return res.redirect('/');
@@ -157,6 +192,7 @@ router.post('/delete', async (req, res) => {
     const { resumeIds } = req.body;
 
     if (!resumeIds || resumeIds.length === 0) {
+      // Must select at least one resume
       const rawResumes = await ResumesService.getResumesByUserId(userId);
       const resumes = mapAndSortResumes(rawResumes);
       return res.render('resumes', {
@@ -166,10 +202,10 @@ router.post('/delete', async (req, res) => {
       });
     }
 
-    // Call the service to delete the selected resumes
+    // Delete resumes via service
     await ResumesService.deleteResumes(userId, resumeIds);
 
-    // After deletion, fetch the updated list of resumes and render the page
+    // Fetch updated list after deletion
     const rawResumes = await ResumesService.getResumesByUserId(userId);
     const updatedResumes = mapAndSortResumes(rawResumes);
 
@@ -182,7 +218,6 @@ router.post('/delete', async (req, res) => {
     console.error('Error while deleting resumes:', err);
 
     let resumes = [];
-
     try {
       const rawResumes = await ResumesService.getResumesByUserId(
         req.session.user.id
@@ -200,15 +235,21 @@ router.post('/delete', async (req, res) => {
   }
 });
 
-// Search by name
+/**
+ * @route   GET /search
+ * @desc    Search resumes by name for logged-in user
+ * @access  Private
+ * @param   {string} req.query.name - Search term to filter resume names
+ */
 router.get('/search', async (req, res) => {
   if (!req.session || !req.session.user) {
     return res.redirect('/');
   }
 
   try {
-    const { name } = req.query; // from search bar input
+    const { name } = req.query; // from search input
 
+    // Fetch resumes matching name filter
     const rawResumes = await ResumesService.getResumesByNameAndUserId(
       name,
       req.session.user.id

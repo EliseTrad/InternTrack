@@ -202,6 +202,15 @@ class CoverLettersService {
     }
   }
 
+  /**
+   * Deletes multiple cover letters for a user.
+   *
+   * @param {number} userId - The ID of the user who owns the cover letters.
+   * @param {Array<number>} coverLetterIds - An array of cover letter IDs to delete.
+   * @returns {Promise<void>} Resolves when the cover letters are deleted.
+   * @throws {NotFound} If the user or cover letters are not found.
+   * @throws {Error} If there is an issue deleting the cover letters.
+   */
   static async deleteCoverLettersByUser(userId, coverLetterIds) {
     try {
       if (!userId) throw new NotFound('User session expired.');
@@ -220,6 +229,15 @@ class CoverLettersService {
     }
   }
 
+  /**
+   * Retrieves cover letters by name and user ID.
+   *
+   * @param {string} name - The file name of the cover letters.
+   * @param {number} userId - The ID of the user whose cover letters to retrieve.
+   * @returns {Promise<Object[]>} A list of cover letters for the user with the specified name.
+   * @throws {NotFound} If the user is not found.
+   * @throws {Error} If there is an issue fetching the cover letters.
+   */
   static async getCoverLettersByNameAndUserId(name, userId) {
     try {
       // Check if the user exists

@@ -135,6 +135,13 @@ class CoverLettersRepository {
     }
   }
 
+  /**
+   * Deletes multiple cover letters for a given user.
+   *
+   * @param {number} userId - The ID of the user.
+   * @param {Array<number>} coverLetterIds - An array of cover letter IDs to delete.
+   * @returns {Promise<number>} The number of records deleted.
+   */
   static async deleteCoverLettersByUser(userId, coverLetterIds) {
     return await CoverLetter.destroy({
       where: {
@@ -144,6 +151,14 @@ class CoverLettersRepository {
     });
   }
 
+  /**
+   * Retrieves a single cover letter by name and user ID.
+   *
+   * @param {string} name - The file name to search by.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<CoverLetter|null>} The matching cover letter or null.
+   * @throws {Error} If there is an issue during the fetch.
+   */
   static async getCoverLettersByNameAndUserId(name, userId) {
     try {
       const covers = await CoverLetter.findOne({

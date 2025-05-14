@@ -14,6 +14,8 @@ class ResumesService {
    * @param {string} resumeData.resume_file_path - The file path (URL) of the resume.
    * @param {string} resumeData.resume_file_name - The file name of the resume.
    * @param {number} resumeData.user_id - The ID of the user associated with the resume.
+   * @param {Date} [resumeData.resume_upload_date=new Date()] - The upload date of the resume 
+   *                                                            (defaults to current date).
    * @returns {Promise<Object>} The created resume object.
    * @throws {Error} If there is an issue creating the resume.
    */
@@ -193,6 +195,15 @@ class ResumesService {
     }
   }
 
+  /**
+   * Deletes multiple resumes by their IDs.
+   *
+   * @param {number} userId - The ID of the user deleting the resumes.
+   * @param {Array<number>} resumeIds - An array of resume IDs to delete.
+   * @returns {Promise<void>} Resolves if resumes were deleted successfully.
+   * @throws {NotFound} If the user session is expired or no resumes are selected.
+   * @throws {Error} If there is an issue deleting the resumes.
+   */
   static async deleteResumes(userId, resumeIds) {
     try {
       if (!userId) throw new NotFound('User session expired.');
@@ -210,6 +221,15 @@ class ResumesService {
     }
   }
 
+  /**
+   * Retrieves resumes by their file name and user ID.
+   *
+   * @param {string} name - The name of the resume file.
+   * @param {number} userId - The ID of the user to filter by.
+   * @returns {Promise<Resume[]>} A list of resumes matching the name and user ID.
+   * @throws {NotFound} If the user is not found.
+   * @throws {Error} If there is an issue fetching the resumes.
+   */
   static async getResumesByNameAndUserId(name, userId) {
     try {
       // Check if the user exists

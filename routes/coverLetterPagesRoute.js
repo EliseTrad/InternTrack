@@ -3,6 +3,11 @@ const router = express.Router();
 const CoverLettersService = require('../services/coverlettersService');
 const uploadCoverLetter = require('../middleware/uploadCover');
 
+/**
+ * Helper to map raw cover letter records to view-friendly objects and sort by uploadDate descending.
+ * @param {Object|Object[]} rawLetters - Single cover letter object or array from DB
+ * @returns {Array<{id: number, name: string, path: string, uploadDate: string}>}
+ */
 function mapAndSortCoverLetters(rawLetters) {
   const arr = Array.isArray(rawLetters) ? rawLetters : [rawLetters];
   const mapped = arr.map((c) => ({
@@ -11,11 +16,17 @@ function mapAndSortCoverLetters(rawLetters) {
     path: c.cover_file_path,
     uploadDate: c.cover_upload_date,
   }));
+  // Sort by most recent upload first
   return mapped.sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate));
 }
 
-// GET all cover letters for the user
+/**
+ * @route   GET /cover-letters
+ * @desc    Display list of user cover letters
+ * @access  Private
+ */
 router.get('/cover-letters', async (req, res) => {
+  // Redirect unauthenticated users to home
   if (!req.session.user) {
     return res.redirect('/');
   }
@@ -27,6 +38,7 @@ router.get('/cover-letters', async (req, res) => {
     );
     const coverLetters = mapAndSortCoverLetters(rawLetters);
 
+    // Render cover-letters view with data or message if none found
     res.render('cover-letters', {
       coverLetters,
       error: null,
@@ -34,6 +46,7 @@ router.get('/cover-letters', async (req, res) => {
     });
   } catch (err) {
     console.error('Error while fetching cover letters by user ID:', err);
+    // Render view with error message
     res.render('cover-letters', {
       coverLetters: [],
       error: 'Error loading cover letters. Please try again!',
@@ -42,20 +55,27 @@ router.get('/cover-letters', async (req, res) => {
   }
 });
 
-// Upload a new cover letter
+/**
+ * @route   POST /upload
+ * @desc    Upload a new cover letter file
+ * @access  Private
+ * @middleware uploadCoverLetter - handles file upload via multer
+ */
 router.post('/upload', uploadCoverLetter, async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session || !req.session.user) {
     return res.redirect('/');
   }
 
   const userId = req.session.user.id;
   try {
-    // fetch existing letters for rendering
+    // Always fetch existing list for rendering
     const rawLetters = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
     const coverLetters = mapAndSortCoverLetters(rawLetters);
 
+    // Handle upload errors from middleware
     if (req.uploadError) {
       return res.render('cover-letters', {
         coverLetters,
@@ -66,6 +86,7 @@ router.post('/upload', uploadCoverLetter, async (req, res) => {
 
     const file = req.file;
     if (!file) {
+      // No file provided
       return res.render('cover-letters', {
         coverLetters,
         error: 'No file uploaded.',
@@ -73,14 +94,14 @@ router.post('/upload', uploadCoverLetter, async (req, res) => {
       });
     }
 
-    // Save the uploaded cover letter
+    // Save new cover letter record in DB
     await CoverLettersService.createCoverLetter({
       cover_file_path: `uploads/covers/${file.filename}`,
       cover_file_name: file.originalname,
       user_id: userId,
     });
 
-    // Fetch updated list and render with success
+    // Fetch updated list and render success message
     const updatedRaw = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
@@ -93,6 +114,7 @@ router.post('/upload', uploadCoverLetter, async (req, res) => {
     });
   } catch (err) {
     console.error('Unexpected upload error:', err);
+    // Render view with server error
     res.render('cover-letters', {
       coverLetters: [],
       error: 'Unexpected server error. Please try again later.',
@@ -101,8 +123,15 @@ router.post('/upload', uploadCoverLetter, async (req, res) => {
   }
 });
 
-// Rename an existing cover letter
+/**
+ * @route   POST /rename
+ * @desc    Rename an existing cover letter
+ * @access  Private
+ * @param   {string} req.body.coverLetterId - ID of cover letter to rename
+ * @param   {string} req.body.newName - New display name for cover letter
+ */
 router.post('/rename', async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session || !req.session.user) {
     return res.redirect('/');
   }
@@ -111,6 +140,7 @@ router.post('/rename', async (req, res) => {
   const { coverLetterId, newName } = req.body;
 
   try {
+    // Require both parameters
     if (!newName || !coverLetterId) {
       const rawLetters = await CoverLettersService.getCoverLettersByUserId(
         userId
@@ -123,11 +153,13 @@ router.post('/rename', async (req, res) => {
       });
     }
 
+    // Update cover letter name in DB
     await CoverLettersService.updateCoverLetterById(coverLetterId, {
       cover_file_name: newName,
       user_id: userId,
     });
 
+    // Fetch updated list for view
     const rawLetters = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
@@ -140,6 +172,7 @@ router.post('/rename', async (req, res) => {
     });
   } catch (err) {
     console.error('Error while renaming cover letter:', err);
+    // On error, re-fetch list and show failure message
     const rawLetters = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
@@ -152,8 +185,14 @@ router.post('/rename', async (req, res) => {
   }
 });
 
-// Delete selected cover letters
+/**
+ * @route   POST /delete
+ * @desc    Delete selected cover letters
+ * @access  Private
+ * @param   {string[]} req.body.coverLetterIds - Array of IDs to delete
+ */
 router.post('/delete', async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session || !req.session.user) {
     return res.redirect('/');
   }
@@ -162,6 +201,7 @@ router.post('/delete', async (req, res) => {
   const { coverLetterIds } = req.body;
 
   try {
+    // Require at least one selection
     if (!coverLetterIds || coverLetterIds.length === 0) {
       const rawLetters = await CoverLettersService.getCoverLettersByUserId(
         userId
@@ -174,8 +214,10 @@ router.post('/delete', async (req, res) => {
       });
     }
 
+    // Perform deletion via service
     await CoverLettersService.deleteCoverLettersByUser(userId, coverLetterIds);
 
+    // Fetch updated list for view
     const rawLetters = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
@@ -187,6 +229,7 @@ router.post('/delete', async (req, res) => {
     });
   } catch (err) {
     console.error('Error while deleting cover letters:', err);
+    // On error, re-fetch list and show failure message
     const rawLetters = await CoverLettersService.getCoverLettersByUserId(
       userId
     );
@@ -199,8 +242,14 @@ router.post('/delete', async (req, res) => {
   }
 });
 
-// Search cover letters by name
+/**
+ * @route   GET /search
+ * @desc    Search cover letters by name for logged-in user
+ * @access  Private
+ * @param   {string} req.query.name - Search term for cover letter names
+ */
 router.get('/search', async (req, res) => {
+  // Ensure user is authenticated
   if (!req.session || !req.session.user) {
     return res.redirect('/');
   }
@@ -212,6 +261,8 @@ router.get('/search', async (req, res) => {
       req.session.user.id
     );
     const coverLetters = mapAndSortCoverLetters(rawLetters);
+
+    // Render view with search results or no-match message
     res.render('cover-letters', {
       coverLetters,
       error: null,
@@ -223,7 +274,7 @@ router.get('/search', async (req, res) => {
   } catch (err) {
     console.error('Error in search:', err);
 
-    // Attempt to fetch fallback list if search fails
+    // Attempt fallback fetch on error
     let coverLetters = [];
     try {
       const rawLetters = await CoverLettersService.getCoverLettersByUserId(
@@ -234,6 +285,7 @@ router.get('/search', async (req, res) => {
       console.error('Error fetching fallback cover letters:', innerErr);
     }
 
+    // Render view with fallback data and error message
     res.render('cover-letters', {
       coverLetters,
       error: 'Search failed.',
