@@ -7,7 +7,7 @@
       <h5>Upload New Resume</h5>
     </div>
     <div class="card-body">
-      <form method="POST" action="/resumes/add" enctype="multipart/form-data">
+      <form method="POST" action="/resumePage/upload" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="resumeFile" class="form-label">Select File</label>
           <input
@@ -26,7 +26,7 @@
   <!-- Manage Resumes Section -->
   <h2 class="mb-4">Manage Your Resumes</h2>
   <!-- Search Form -->
-  <form class="mb-3" method="GET" action="/resumes/search">
+  <form class="mb-3" method="GET" action="/resumePage/search">
     <div class="input-group">
       <input
         type="text"
@@ -38,7 +38,7 @@
       <button class="btn btn-outline-primary" type="submit">Search</button>
     </div>
   </form>
-  <a href="/resumes" class="btn btn-link">View All Resumes</a>
+  <a href="/resumePage/resumes" class="btn btn-link">View All Resumes</a>
 
   <!-- Flash Messages -->
   <% if (locals.error) { %>
@@ -50,7 +50,7 @@
   <!-- Delete Form -->
   <form
     method="POST"
-    action="/resumes/delete"
+    action="/resumePage/delete"
     onsubmit="return confirm('Delete selected resumes?')"
     id="delete-form"
   >
@@ -118,7 +118,7 @@
   <form
     id="rename-form"
     method="POST"
-    action="/resumes/update"
+    action="/resumePage/rename"
     style="display: none"
   >
     <input type="hidden" id="rename-resume-id" name="resumeId" />

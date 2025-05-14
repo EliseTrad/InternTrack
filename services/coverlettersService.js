@@ -201,6 +201,49 @@ class CoverLettersService {
       throw error; // Propagate the error to the controller
     }
   }
+
+  static async deleteCoverLettersByUser(userId, coverLetterIds) {
+    try {
+      if (!userId) throw new NotFound('User session expired.');
+      if (!coverLetterIds || coverLetterIds.length === 0)
+        throw new Error('No cover letters selected.');
+
+      const deletedCount =
+        await CoverLettersRepository.deleteCoverLettersByUser(
+          userId,
+          coverLetterIds
+        );
+      if (deletedCount === 0) throw new NotFound('No cover letters were deleted.');
+    } catch (error) {
+      console.error('Error in service when deleting cover letters:', error);
+      throw error;
+    }
+  }
+
+  static async getCoverLettersByNameAndUserId(name, userId) {
+    try {
+      // Check if the user exists
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) throw new NotFound(`User with ID ${userId} not found.`);
+
+      let covers = await CoverLettersRepository.getCoverLettersByNameAndUserId(
+        name,
+        userId
+      );
+
+      if (!covers) {
+        covers = [];
+      }
+
+      return covers;
+    } catch (error) {
+      console.error(
+        'Error in coverletterService while fetching covers by name and user ID:',
+        error
+      );
+      throw error; // Let the controller handle it
+    }
+  }
 }
 
 module.exports = CoverLettersService;

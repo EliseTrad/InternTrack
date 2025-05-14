@@ -204,7 +204,7 @@ class UserService {
       if (!user) throw new NotFound(`User with name ${name} not found.`);
 
       // Validate the password
-      const isPasswordValid = await user.validPassword(password);
+      const isPasswordValid = user.validPassword(password);
       if (!isPasswordValid) throw new InvalidPassword();
 
       return user; // Return the authenticated user

@@ -192,6 +192,48 @@ class ResumesService {
       throw error; // Propagate the error to the controller
     }
   }
+
+  static async deleteResumes(userId, resumeIds) {
+    try {
+      if (!userId) throw new NotFound('User session expired.');
+      if (!resumeIds || resumeIds.length === 0)
+        throw new Error('No resumes selected.');
+
+      const deletedCount = await ResumesRepository.deleteResumesByUser(
+        userId,
+        resumeIds
+      );
+      if (deletedCount === 0) throw new NotFound('No resumes were deleted.');
+    } catch (error) {
+      console.error('Error in service when deleting resumes:', error);
+      throw error;
+    }
+  }
+
+  static async getResumesByNameAndUserId(name, userId) {
+    try {
+      // Check if the user exists
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) throw new NotFound(`User with ID ${userId} not found.`);
+      
+      let resume = await ResumesRepository.getResumesByNameAndUserId(
+        name,
+        userId
+      );
+
+      if (!resume) {
+        resume = [];
+      }
+
+      return resume;
+    } catch (error) {
+      console.error(
+        'Error in ResumesService while fetching resume by name and user ID:',
+        error
+      );
+      throw error; // Let the controller handle it
+    }
+  }
 }
 
 module.exports = ResumesService;

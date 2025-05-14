@@ -39,9 +39,20 @@ router.get('/name/:name', validationFileName, (req, res) =>
   CoverLettersController.getCoverLettersByName(req, res)
 );
 
+// Get cover letters by name and user id
+router.get('/nameAndUserId/:name', validationFileName, (req, res) =>
+  CoverLettersController.getCoverLettersByNameAndUserId(req, res)
+);
+
 // Delete a cover letter by id
 router.delete('/delete/:id', validationCoverLetterId, (req, res) =>
   CoverLettersController.deleteCoverLetter(req, res)
 );
+
+// Delete cover letters
+router.delete('/deleteCoverLetters', (req, res) =>
+  CoverLettersController.deleteCoverLettersByUser(req, res)
+);
+
 
 module.exports = router;

@@ -132,6 +132,34 @@ class ResumesRepository {
       throw error; // Propagate the error to the service layer
     }
   }
+
+  static async deleteResumesByUser(userId, resumeIds) {
+    return await Resume.destroy({
+      where: {
+        user_id: userId,
+        resume_id: resumeIds,
+      },
+    });
+  }
+
+  static async getResumesByNameAndUserId(name, userId) {
+    try {
+      const resume = await Resume.findOne({
+        where: {
+          resume_file_name: name,
+          user_id: userId,
+        },
+      });
+
+      return resume;
+    } catch (error) {
+      console.error(
+        'Error in ResumesRepository.getResumesByNameAndUserId:',
+        error
+      );
+      throw error;
+    }
+  }
 }
 
 module.exports = ResumesRepository;

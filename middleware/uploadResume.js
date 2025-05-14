@@ -1,34 +1,49 @@
 const multer = require('multer');
+const path = require('path');
 
 // Set up file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/resumes'); // Set the folder where uploaded files will go
+    cb(null, 'public/uploads/resumes');
   },
   filename: (req, file, cb) => {
-    const fileExtension = file.originalname.split('.').pop();
-    cb(null, `${Date.now()}.${fileExtension}`); // Set the filename as the current timestamp
+    const fileExtension = path.extname(file.originalname); // safer than split('.')
+    cb(null, `${Date.now()}${fileExtension}`);
   },
 });
 
-// Set file filter (you can restrict file types here)
+// File filter
 const fileFilter = (req, file, cb) => {
-  const allowedFileTypes = /pdf|docx|jpeg|jpg|gif/;
-  const mimeType = allowedFileTypes.test(file.mimetype);
-  const extname = allowedFileTypes.test(file.originalname.split('.').pop());
+  const allowedExtensions = /pdf|docx|jpeg|jpg|gif/;
+  const extname = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedExtensions.test(file.mimetype);
 
-  if (mimeType && extname) {
+  if (extname && mimetype) {
     return cb(null, true);
   } else {
     cb(new Error('Unsupported file type. Please upload PDF, DOCX, or image files.'));
   }
 };
 
-// Initialize multer with the storage and fileFilter configuration
-const uploadResume = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
+// Set up multer
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
 });
+
+// Middleware wrapper that catches Multer errors
+const uploadResume = (req, res, next) => {
+  upload.single('resumeFile')(req, res, (err) => {
+    if (err instanceof multer.MulterError || err?.message.includes('Unsupported file type')) {
+      req.uploadError = err.message;
+      return next(); // still go to the route
+    } else if (err) {
+      req.uploadError = 'File upload failed.';
+      return next();
+    }
+    next(); // success case
+  });
+};
 
 module.exports = uploadResume;

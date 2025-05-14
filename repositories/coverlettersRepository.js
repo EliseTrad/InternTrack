@@ -134,6 +134,34 @@ class CoverLettersRepository {
       throw error; // Propagate the error to the service layer
     }
   }
+
+  static async deleteCoverLettersByUser(userId, coverLetterIds) {
+    return await CoverLetter.destroy({
+      where: {
+        user_id: userId,
+        cover_letter_id: coverLetterIds,
+      },
+    });
+  }
+
+  static async getCoverLettersByNameAndUserId(name, userId) {
+    try {
+      const covers = await CoverLetter.findOne({
+        where: {
+          cover_file_name: name,
+          user_id: userId,
+        },
+      });
+
+      return covers;
+    } catch (error) {
+      console.error(
+        'Error in coverLettersRepository.getCoverLettersByNameAndUserId:',
+        error
+      );
+      throw error;
+    }
+  }
 }
 
 module.exports = CoverLettersRepository;

@@ -12,6 +12,8 @@ const coverLettersRoute = require('./routes/coverlettersRoute');
 const applicationsRoute = require('./routes/applicationsRoute');
 const pagesRoute = require('./routes/pagesRoute');
 const userPagesRoute = require('./routes/userPagesRoute');
+const resumePagesRoute = require('./routes/resumePagesRoute');
+const coverLetterPagesRoute = require('./routes/coverLetterPagesRoute');
 
 app.use(
   session({
@@ -36,6 +38,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
 
 app.use('/', pagesRoute);
+app.use('/resumePage', resumePagesRoute);
+app.use('/coverLetterPage', coverLetterPagesRoute);
 app.use('/userPage', userPagesRoute);
 app.use('/users', usersRoute);
 app.use('/resumes', resumesRoute);

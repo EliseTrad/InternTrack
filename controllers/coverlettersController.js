@@ -1,4 +1,4 @@
-const CoverLettersService = require('../services/coverLettersService');
+const CoverLettersService = require('../services/coverlettersService');
 const { NotFound, ConflictError } = require('../errors/customError');
 
 /**
@@ -141,7 +141,7 @@ class CoverLettersController {
     try {
       const { name } = req.params; // Extract file name from route parameters
 
-      // Call the service to fetch cover letters 
+      // Call the service to fetch cover letters
       const covers = await CoverLettersService.getCoverLettersByName(name);
 
       // Return the list of cover letters
@@ -219,6 +219,85 @@ class CoverLettersController {
       } else {
         res.status(500).json({ message: 'An unexpected error occurred.' });
       }
+    }
+  }
+
+  static async deleteCoverLettersByUser(req, res) {
+    try {
+      const userId = req.body.userId;
+      const coverLetterIds = req.body.coverLetterIds;
+
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Missing userId.' });
+      }
+
+      await CoverLettersService.deleteCoverLettersByUser(
+        userId,
+        coverLetterIds
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Cover letters deleted successfully.',
+      });
+    } catch (error) {
+      console.error('Controller error while deleting cover letters:', error);
+
+      if (error instanceof NotFound) {
+        return res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: 'An unexpected error occurred while deleting cover letters.',
+      });
+    }
+  }
+
+  static async getCoverLettersByNameAndUserId(req, res) {
+    try {
+      const name = req.params.name;
+      const userId = req.body.userId;
+
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Missing userId.' });
+      }
+
+      const covers = await CoverLettersService.getCoverLettersByNameAndUserId(
+        name,
+        userId
+      );
+
+      if (!covers) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Cover letter not found.' });
+      }
+
+      return res.status(200).json({ success: true, covers });
+    } catch (error) {
+      console.error(
+        'Controller error while fetching cover letters by name:',
+        error
+      );
+
+      if (error instanceof NotFound) {
+        return res
+          .status(error.statusCode)
+          .json({ success: false, message: error.message });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message:
+          'An unexpected error occurred while fetching the cover letters.',
+      });
     }
   }
 }

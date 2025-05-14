@@ -37,9 +37,19 @@ router.get('/name/:name', validationName, (req, res) =>
   ResumesController.getResumesByName(req, res)
 );
 
+// Get resumes by name and user id
+router.get('/nameAndUserId/:name', validationName, (req, res) =>
+  ResumesController.getResumesByNameAndUserId(req, res)
+);
+
 // Delete a resume by id
 router.delete('/delete/:id', validationResumeId, (req, res) =>
   ResumesController.deleteResumeById(req, res)
+);
+
+// Delete resumes
+router.delete('/deleteResumes', (req, res) =>
+  ResumesController.deleteResumes(req, res)
 );
 
 module.exports = router;
