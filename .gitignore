@@ -1,2 +1,12 @@
 .env
 node_modules/
+
+# Ignore everything inside these folders
+/public/uploads/covers/*
+/public/uploads/resumes/*
+/public/uploads/users/*
+
+# But do NOT ignore the folders themselves
+!/public/uploads/covers/.gitkeep
+!/public/uploads/resumes/.gitkeep
+!/public/uploads/users/.gitkeep

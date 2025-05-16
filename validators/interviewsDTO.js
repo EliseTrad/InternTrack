@@ -30,8 +30,7 @@ const validateInterview = [
     .withMessage('Location must be a string.'),
 
   body('reminder_sent')
-    .notEmpty()
-    .withMessage('Reminder status is required.')
+    .optional()
     .isBoolean()
     .withMessage('Reminder status must be a boolean value (true or false).'),
 
@@ -50,7 +49,7 @@ const validateInterview = [
     .withMessage('Application ID must be an integer.'),
 
   /**
-   * Middleware to handle validation errors.
+   * Middleware to handle validation errors and return them as a joined string.
    * @param {Object} req - The request object.
    * @param {Object} res - The response object.
    * @param {function} next - The next middleware function.
@@ -58,7 +57,8 @@ const validateInterview = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      const errorMessages = errors.array().map((err) => err.msg); // Collect all error messages
+      return res.status(400).json({ errors: errorMessages.join(' ') }); // Join errors with spaces
     }
     next();
   },
@@ -186,7 +186,7 @@ const validationUpdateInterview = [
     .withMessage('Application ID must be an integer.'),
 
   /**
-   * Middleware to handle validation errors.
+   * Middleware to handle validation errors and return them as a joined string.
    * @param {Object} req - The request object.
    * @param {Object} res - The response object.
    * @param {function} next - The next middleware function.
@@ -194,7 +194,8 @@ const validationUpdateInterview = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      const errorMessages = errors.array().map((err) => err.msg); // Collect all error messages
+      return res.status(400).json({ errors: errorMessages.join(' ') }); // Join errors with spaces
     }
     next();
   },
@@ -206,7 +207,9 @@ const validationUpdateInterview = [
 const validateDate = [
   param('date')
     .isISO8601()
-    .withMessage('Date must be a valid datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).')
+    .withMessage(
+      'Date must be a valid datetime in ISO 8601 format (YYYY-MM-DDTHH:mm:ss).'
+    )
     .toDate(),
 
   /**

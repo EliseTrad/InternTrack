@@ -18,12 +18,5 @@ router.get('/dashboard/user', (req, res) => {
   res.redirect('/');
 });
 
-// Admin dashboard page
-router.get('/dashboard/admin', (req, res) => {
-  if (req.session.user && !req.session.user.isAdmin) {
-    return res.render('dashboard/admin'); // views/dashboard/admin.ejs
-  }
-  res.redirect('/');
-});
 
 module.exports = router;

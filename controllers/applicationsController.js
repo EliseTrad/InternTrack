@@ -590,6 +590,213 @@ class ApplicationsController {
         .json({ message: 'Could not export applications to Excel.' });
     }
   }
+
+  /**
+   * Retrieves applications by company name for a specific user.
+   *
+   * @route GET /applications/company/:name/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.name - The company name to search applications by.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the company name for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsByCompanyNameAndUser(req, res) {
+    try {
+      const { name, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsByCompanyNameAndUser(
+          name,
+          userId
+        );
+      res.status(200).json(applications); // OK
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by company name and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
+
+  /**
+   * Retrieves applications by position title for a specific user.
+   *
+   * @route GET /applications/position/:title/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.title - The position title to search applications by.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the position title for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsByPositionTitleAndUser(req, res) {
+    try {
+      const { title, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsByPositionTitleAndUser(
+          title,
+          userId
+        );
+      res.status(200).json(applications);
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by position title and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
+
+  /**
+   * Retrieves applications by status for a specific user.
+   *
+   * @route GET /applications/status/:status/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.status - The status to search applications by.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the status for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsByStatusAndUser(req, res) {
+    try {
+      const { status, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsByStatusAndUser(
+          status,
+          userId
+        );
+      res.status(200).json(applications);
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by status and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
+
+  /**
+   * Retrieves applications by deadline for a specific user.
+   *
+   * @route GET /applications/deadline/:deadline/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.deadline - The deadline date in 'YYYY-MM-DD' format.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the deadline for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsByDeadlineAndUser(req, res) {
+    try {
+      const { deadline, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsByDeadlineAndUser(
+          deadline,
+          userId
+        );
+      res.status(200).json(applications);
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by deadline and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
+
+  /**
+   * Retrieves applications by date for a specific user.
+   *
+   * @route GET /applications/date/:date/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.date - The application date in 'YYYY-MM-DD' format.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the date for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsByDateAndUser(req, res) {
+    try {
+      const { date, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsByDateAndUser(date, userId);
+      res.status(200).json(applications);
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by date and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
+
+  /**
+   * Retrieves applications by source for a specific user.
+   *
+   * @route GET /applications/source/:source/user/:userId
+   * @param {Object} req - The Express request object.
+   * @param {string} req.params.source - The source of the application.
+   * @param {string} req.params.userId - The ID of the user.
+   * @param {Object} res - The Express response object.
+   * @returns {Object[]} 200 - A list of applications matching the source for the user.
+   * @throws {NotFound} If the user does not exist or no applications are found.
+   */
+  static async getApplicationsBySourceAndUser(req, res) {
+    try {
+      const { source, userId } = req.params;
+      const applications =
+        await ApplicationsService.getApplicationsBySourceAndUser(
+          source,
+          userId
+        );
+      res.status(200).json(applications);
+    } catch (error) {
+      let errorCode = 500;
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      if (error instanceof NotFound) {
+        errorCode = error.statusCode;
+        errorMessage = error.message;
+      }
+      console.error(
+        'Error in ApplicationsController while fetching applications by source and user ID:',
+        error
+      );
+      res.status(errorCode).json({ message: errorMessage });
+    }
+  }
 }
 
 module.exports = ApplicationsController;

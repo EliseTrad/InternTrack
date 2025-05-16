@@ -13,10 +13,14 @@ class InterviewsService {
     try {
       const { application_id } = interview;
 
-      const applicationExists = await ApplicationsRepository.getApplicationById(application_id);
+      const applicationExists =
+        await ApplicationsRepository.getApplicationById(application_id);
       if (!applicationExists) {
         throw new NotFound(`Application with ID ${application_id} not found.`);
       }
+
+      // Ensure reminder_sent is always false
+      interview.reminder_sent = false;
 
       return await InterviewsRepository.createInterview(interview);
     } catch (error) {
@@ -143,9 +147,8 @@ class InterviewsService {
    */
   static async getInterviewsByLocation(loc) {
     try {
-      const interviews = await InterviewsRepository.getInterviewsByLocation(
-        loc
-      );
+      const interviews =
+        await InterviewsRepository.getInterviewsByLocation(loc);
 
       if (!interviews || interviews.length === 0) {
         throw new NotFound(`No interviews found for location ${loc}.`);
@@ -169,9 +172,8 @@ class InterviewsService {
    */
   static async getInterviewsByReminder(reminder) {
     try {
-      const interviews = await InterviewsRepository.getInterviewsByReminder(
-        reminder
-      );
+      const interviews =
+        await InterviewsRepository.getInterviewsByReminder(reminder);
 
       if (!interviews || interviews.length === 0) {
         throw new NotFound(
@@ -197,9 +199,8 @@ class InterviewsService {
    */
   static async getInterviewsByStatus(status) {
     try {
-      const interviews = await InterviewsRepository.getInterviewsByStatus(
-        status
-      );
+      const interviews =
+        await InterviewsRepository.getInterviewsByStatus(status);
 
       if (!interviews || interviews.length === 0) {
         throw new NotFound(`No interviews found with status ${status}.`);

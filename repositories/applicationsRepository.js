@@ -276,6 +276,102 @@ class ApplicationsRepository {
       throw error; // Propagate the error to the service layer
     }
   }
+
+  /**
+   * Retrieves applications by company name for a specific user.
+   *
+   * @param {string} name - The company name of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the company name for the user.
+   */
+  static async getApplicationsByCompanyNameAndUser(name, userId) {
+    return await Application.findAll({
+      where: {
+        company_name: name,
+        user_id: userId,
+      },
+    });
+  }
+
+  /**
+   * Retrieves applications by position title for a specific user.
+   *
+   * @param {string} title - The position title of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the position title for the user.
+   */
+  static async getApplicationsByPositionTitleAndUser(title, userId) {
+    return await Application.findAll({
+      where: {
+        position_title: title,
+        user_id: userId,
+      },
+    });
+  }
+
+  /**
+   * Retrieves applications by status for a specific user.
+   *
+   * @param {string} status - The status of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the status for the user.
+   */
+  static async getApplicationsByStatusAndUser(status, userId) {
+    return await Application.findAll({
+      where: {
+        status: status,
+        user_id: userId,
+      },
+    });
+  }
+
+  /**
+   * Retrieves applications by deadline for a specific user.
+   *
+   * @param {string} deadline - The deadline date of the application ('YYYY-MM-DD').
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the deadline for the user.
+   */
+  static async getApplicationsByDeadlineAndUser(deadline, userId) {
+    return await Application.findAll({
+      where: {
+        deadline: deadline,
+        user_id: userId,
+      },
+    });
+  }
+
+  /**
+   * Retrieves applications by date for a specific user.
+   *
+   * @param {string} date - The date of the application ('YYYY-MM-DD').
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the date for the user.
+   */
+  static async getApplicationsByDateAndUser(date, userId) {
+    return await Application.findAll({
+      where: {
+        application_date: date,
+        user_id: userId,
+      },
+    });
+  }
+
+  /**
+   * Retrieves applications by source for a specific user.
+   *
+   * @param {string} source - The source of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the source for the user.
+   */
+  static async getApplicationsBySourceAndUser(source, userId) {
+    return await Application.findAll({
+      where: {
+        source: source,
+        user_id: userId,
+      },
+    });
+  }
 }
 
 module.exports = ApplicationsRepository;

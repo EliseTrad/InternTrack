@@ -3,11 +3,11 @@
 // Import required modules
 const express = require('express');
 const app = express();
+require('dotenv').config();
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
 const flash = require('connect-flash');
-require('dotenv').config();
 
 // Import all my route files
 const usersRoute = require('./routes/usersRoute');
@@ -19,6 +19,8 @@ const pagesRoute = require('./routes/pagesRoute');
 const userPagesRoute = require('./routes/userPagesRoute');
 const resumePagesRoute = require('./routes/resumePagesRoute');
 const coverLetterPagesRoute = require('./routes/coverLetterPagesRoute');
+const applicationPagesRoute = require('./routes/applicationPagesRoute');
+const interviewPagesRoute = require('./routes/interviewPagesRoute');
 
 // Set up session middleware
 app.use(
@@ -44,11 +46,21 @@ app.use((req, res, next) => {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static('public'));
+app.use(
+  '/uploads/resumes',
+  express.static(path.join(__dirname, 'public', 'uploads', 'resumes'))
+);
+app.use(
+  '/uploads/covers',
+  express.static(path.join(__dirname, 'public', 'uploads', 'covers'))
+);
 
 // Route handling (I grouped APIs and pages logically)
 app.use('/', pagesRoute);
 app.use('/resumePage', resumePagesRoute);
 app.use('/coverLetterPage', coverLetterPagesRoute);
+app.use('/interviewPage', interviewPagesRoute);
+app.use('/applicationPage', applicationPagesRoute);
 app.use('/userPage', userPagesRoute);
 app.use('/users', usersRoute);
 app.use('/resumes', resumesRoute);

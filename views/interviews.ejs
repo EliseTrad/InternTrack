@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interviews</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+</head>
+
+<body>
+  <div class="container my-4">
+    <h1 class="mb-4">Interviews</h1>
+
+    <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+    <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <!-- Filter Section -->
+    <form class="row g-3 mb-4" method="GET" action="/interviewPage/interviews">
+      <div class="col-md-3">
+        <label for="filterStatus" class="form-label">Status</label>
+        <select class="form-select" id="filterStatus" name="status">
+          <option value="" <%= !status ? 'selected' : '' %>>All</option>
+          <option value="scheduled" <%= status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+          <option value="completed" <%= status === 'completed' ? 'selected' : '' %>>Completed</option>
+          <option value="cancelled" <%= status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+          <option value="no_show" <%= status === 'no_show' ? 'selected' : '' %>>No Show</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="filterLocation" class="form-label">Location</label>
+        <input type="text" class="form-control" id="filterLocation" name="location" value="<%= location || '' %>">
+      </div>
+      <div class="col-md-3">
+        <label for="filterDateFrom" class="form-label">Date From</label>
+        <input type="date" class="form-control" id="filterDateFrom" name="date_from" value="<%= date_from || '' %>">
+      </div>
+      <div class="col-md-3">
+        <label for="filterDateTo" class="form-label">Date To</label>
+        <input type="date" class="form-control" id="filterDateTo" name="date_to" value="<%= date_to || '' %>">
+      </div>
+      <div class="col-md-3 align-self-end">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+        <a href="/interviewPage/interviews" class="btn btn-link">Reset</a>
+      </div>
+    </form>
+
+    <!-- Add Interview Button -->
+    <button id="addInterviewBtn" class="btn btn-primary mb-4">+ Add Interview</button>
+
+    <!-- Reminder Section -->
+    <button id="showRemindersBtn" class="btn btn-warning mb-3">🔔 Reminders Ring</button>
+
+    <!-- Reminder List -->
+    <div id="reminderList" class="card mb-4 d-none">
+      <div class="card-body">
+        <h5 class="card-title">Interviews Needing Reminders</h5>
+        <% const pendingReminders = interviews.filter(interview => !interview.reminder); %>
+        <% if (pendingReminders.length === 0) { %>
+        <p>No interviews need reminders at the moment.</p>
+        <% } else { %>
+        <ul class="list-group">
+          <% pendingReminders.forEach(interview => { %>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Interview with <%= interview.interviewer %> on <%= interview.date %>
+            <form action="/interviewPage/<%= interview.id %>/update" method="POST" class="d-inline">
+              <input type="hidden" name="reminder_sent" value="true" />
+              <button type="submit" class="btn btn-sm btn-success">Send Reminder</button>
+            </form>
+          </li>
+          <% }); %>
+        </ul>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Add/Update Interview Form -->
+    <div id="interviewForm" class="card mb-4 <%= mode === 'edit' ? '' : 'd-none' %>">
+      <div class="card-body">
+        <h5 class="card-title"><%= mode === 'edit' ? 'Edit Interview' : 'New Interview' %></h5>
+        <% if (formError) { %>
+        <div class="alert alert-danger"><%= formError %></div>
+        <% } %>
+        <form action="<%= mode === 'edit' ? `/interviewPage/${editingInterviewId}/update` : '/interviewPage/create' %>" method="POST">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="interviewerName" class="form-label">Interviewer Name</label>
+              <input type="text" class="form-control" id="interviewerName" name="interviewer_name" value="<%= formData.interviewer_name || '' %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="interviewerEmail" class="form-label">Interviewer Email</label>
+              <input type="email" class="form-control" id="interviewerEmail" name="interviewer_email" value="<%= formData.interviewer_email || '' %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="location" class="form-label">Location</label>
+              <input type="text" class="form-control" id="location" name="location" value="<%= formData.location || '' %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="interviewDate" class="form-label">Interview Date</label>
+              <input type="datetime-local" step="60" class="form-control" id="interviewDate" name="interview_date" value="<%= formData.interview_date || '' %>" required>
+            </div>
+            <div class="col-md-6">
+              <label for="interviewStatus" class="form-label">Interview Status</label>
+              <select class="form-select" id="interviewStatus" name="interview_status" required>
+                <option value="scheduled" <%= formData.interview_status === 'scheduled' ? 'selected' : '' %>>Scheduled</option>
+                <option value="completed" <%= formData.interview_status === 'completed' ? 'selected' : '' %>>Completed</option>
+                <option value="cancelled" <%= formData.interview_status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+                <option value="no_show" <%= formData.interview_status === 'no_show' ? 'selected' : '' %>>No Show</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="applicationId" class="form-label">Application</label>
+              <select class="form-select" id="applicationId" name="application_id" required>
+                <% applications.forEach(app => { %>
+                <option value="<%= app.id %>" <%= formData.application_id == app.id ? 'selected' : '' %>>
+                  <%= app.companyName %> - <%= app.positionTitle %> (Applied on: <%= app.applicationDate %>)
+                </option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-success"><%= mode === 'edit' ? 'Update Interview' : 'Create Interview' %></button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Interviews Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle text-nowrap">
+        <thead class="table-light sticky-top">
+          <tr>
+            <th>Interviewer</th>
+            <th>Email</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Application</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (interviews.length === 0) { %>
+          <tr>
+            <td colspan="8" class="text-center">No interviews found.</td>
+          </tr>
+          <% } else { %>
+          <% interviews.forEach(interview => { %>
+          <tr>
+            <td><%= interview.interviewer %></td>
+            <td><%= interview.email %></td>
+            <td><%= interview.location %></td>
+            <td><%= interview.date %></td>
+            <td>
+              <%= {
+    scheduled: "Scheduled",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    no_show: "No Show"
+  }[interview.status] || interview.status %>
+            </td>
+            <td><%= interview.applicationId %></td>
+            <td>
+              <a href="/interviewPage/<%= interview.id %>/update" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <form action="/interviewPage/<%= interview.id %>/delete" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const showRemindersBtn = document.getElementById('showRemindersBtn');
+    const reminderList = document.getElementById('reminderList');
+    const addInterviewBtn = document.getElementById('addInterviewBtn');
+    const interviewForm = document.getElementById('interviewForm');
+
+    showRemindersBtn.addEventListener('click', () => {
+      reminderList.classList.toggle('d-none');
+    });
+
+    addInterviewBtn.addEventListener('click', () => {
+      interviewForm.classList.remove('d-none');
+    });
+  </script>
+</body>
+
+</html>

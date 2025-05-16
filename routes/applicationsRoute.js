@@ -6,7 +6,7 @@ const {
   validationApplicationId,
   validationStatus,
   validationDate,
-  validationUpdate
+  validationUpdate,
 } = require('../validators/applicationsDTO');
 const { validationUserId } = require('../validators/usersDTO');
 const { validationResumeId } = require('../validators/resumesDTO');
@@ -19,7 +19,9 @@ router.post('/create', validateApplication, (req, res) =>
 
 // update application
 router.put(
-  '/update/:id', validationUpdate, validationApplicationId,
+  '/update/:id',
+  validationUpdate,
+  validationApplicationId,
   (req, res) => ApplicationsController.updateApplicationById(req, res)
 );
 
@@ -58,7 +60,7 @@ router.get('/deadline/:deadline', validationDate, (req, res) =>
   ApplicationsController.getApplicationsByDeadline(req, res)
 );
 
-// get applications by the date 
+// get applications by the date
 router.get('/date/:date', validationDate, (req, res) =>
   ApplicationsController.getApplicationsByDate(req, res)
 );
@@ -81,6 +83,46 @@ router.get('/cover/:coverId', validationCoverLetterId, (req, res) =>
 // get count of applications for user
 router.get('/count/:userId', validationUserId, (req, res) =>
   ApplicationsController.countApplicationsForUser(req, res)
+);
+
+// get applications by company name for a specific user
+router.get('/company/:name/user/:userId', validationUserId, (req, res) =>
+  ApplicationsController.getApplicationsByCompanyNameAndUser(req, res)
+);
+
+// get applications by position title for a specific user
+router.get('/position/:title/user/:userId', validationUserId, (req, res) =>
+  ApplicationsController.getApplicationsByPositionTitleAndUser(req, res)
+);
+
+// get applications by status for a specific user
+router.get(
+  '/status/:status/user/:userId',
+  validationStatus,
+  validationUserId,
+  (req, res) => ApplicationsController.getApplicationsByStatusAndUser(req, res)
+);
+
+// get applications by deadline for a specific user
+router.get(
+  '/deadline/:deadline/user/:userId',
+  validationDate,
+  validationUserId,
+  (req, res) =>
+    ApplicationsController.getApplicationsByDeadlineAndUser(req, res)
+);
+
+// get applications by date for a specific user
+router.get(
+  '/date/:date/user/:userId',
+  validationDate,
+  validationUserId,
+  (req, res) => ApplicationsController.getApplicationsByDateAndUser(req, res)
+);
+
+// get applications by source for a specific user
+router.get('/source/:source/user/:userId', validationUserId, (req, res) =>
+  ApplicationsController.getApplicationsBySourceAndUser(req, res)
 );
 
 // export applications to Excel

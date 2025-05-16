@@ -110,26 +110,26 @@ router.post('/authenticate', validateAuthentication, async (req, res) => {
     });
   }
 
-  // Check for admin credentials
-  if (
-    req.body.name === process.env.ADMIN_NAME &&
-    req.body.password === process.env.ADMIN_PASSWORD
-  ) {
-    // Initialize session for admin user
-    req.session.user = {
-      name: req.body.name,
-      isAdmin: true,
-    };
-    req.session.save((error) => {
-      if (error) {
-        console.error('Session save error:', error);
-        return res.status(500).send('Session save failed');
-      }
-      // Redirect to admin dashboard on successful login
-      return res.redirect('/dashboard/admin');
-    });
-    return;
-  }
+if (
+  req.body.name === process.env.ADMIN_NAME &&
+  req.body.password === process.env.ADMIN_PASSWORD
+) {
+  console.log('Admin login successful');
+  req.session.user = {
+    name: req.body.name,
+    isAdmin: true,
+  };
+  req.session.save((error) => {
+    if (error) {
+      console.error('Session save error:', error);
+      return res.status(500).send('Session save failed');
+    }
+    return res.redirect('/userPage/usersInfo');
+  });
+  return;
+} else {
+  console.log('Admin login failed');
+} 
 
   try {
     // Authenticate through UsersService
@@ -305,5 +305,105 @@ router.post('/edit', uploadProfilePicture, validateUpdate, async (req, res) => {
     });
   }
 });
+
+/**
+ * @route   GET /admin/users
+ * @desc    Fetch all users for admin view
+ * @access  Admin Only
+ */
+router.get('/usersInfo', async (req, res) => {
+  try {
+    // Ensure the user is an admin
+    if (!req.session.user || !req.session.user.isAdmin) {
+      return res.redirect('/');
+    }
+
+    // Fetch all users
+    const users = await UsersService.getAllUsers();
+
+    // Render the admin page with the list of users
+    res.render('dashboard/admin', {
+      users,
+      error: null,
+      success: req.query.success || null,
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.render('admin', {
+      users: [],
+      error: 'Failed to fetch users. Please try again later.',
+      success: null,
+    });
+  }
+});
+
+/**
+ * @route   POST /admin/users/:id/delete
+ * @desc    Delete a user account
+ * @access  Admin Only
+ */
+router.post('/users/:id/delete', async (req, res) => {
+  try {
+    // Ensure the user is an admin
+    if (!req.session.user || !req.session.user.isAdmin) {
+      return res.redirect('/');
+    }
+
+    const userId = parseInt(req.params.id, 10);
+
+    // Delete the user
+    await UsersService.deleteUser(userId);
+
+    // Redirect back to the admin page with a success message
+    res.redirect('/userPage/usersInfo?success=User deleted successfully');
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.redirect('/userPage/usersInfo?error=Failed to delete user');
+  }
+});
+
+/**
+ * @route   POST /admin/users/:id/sign-in
+ * @desc    Sign in as another user
+ * @access  Admin Only
+ */
+router.post('/users/:id/sign-in', async (req, res) => {
+  try {
+    // Ensure the user is an admin
+    if (!req.session.user || !req.session.user.isAdmin) {
+      return res.redirect('/');
+    }
+
+    const userId = parseInt(req.params.id, 10);
+
+    // Fetch the user by ID
+    const user = await UsersService.getUserById(userId);
+
+    if (!user) {
+      return res.redirect('/admin/users?error=User not found');
+    }
+
+    // Set the session as the selected user
+    req.session.user = {
+      id: user.user_id,
+      name: user.user_name,
+      email: user.user_email,
+      isAdmin: false, // Ensure the admin is signed in as a regular user
+    };
+
+    req.session.save((error) => {
+      if (error) {
+        console.error('Session save error:', error);
+        return res.status(500).send('Session save failed');
+      }
+      // Redirect to user dashboard
+      return res.redirect('/dashboard/user');
+    });
+  } catch (error) {
+    console.error('Error signing in as user:', error);
+    res.redirect('/admin/users?error=Failed to sign in as user');
+  }
+});
+
 
 module.exports = router;

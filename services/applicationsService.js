@@ -21,10 +21,10 @@ class ApplicationsService {
    * @param {string} applicationData.application_source - The source of the application.
    * @param {number} applicationData.user_id - The ID of the user who created the application.
    * @param {number} applicationData.resume_id - The ID of the resume used in the application.
-   * @param {number|null} [applicationData.cover_letter_id] - Optional ID of the cover letter used 
+   * @param {number|null} [applicationData.cover_letter_id] - Optional ID of the cover letter used
    *                                                          in the application.
    * @returns {Promise<Object>} The created application object.
-   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not found or if there's a 
+   * @throws {NotFound|Error} If related entities (e.g., user, resume) are not found or if there's a
    *                          database error.
    */
   static async createApplication(applicationData) {
@@ -54,6 +54,7 @@ class ApplicationsService {
           );
         }
       }
+      console.log('Data sent to repository:', applicationData);
       // Create the application
       return await ApplicationsRepository.createApplication(applicationData);
     } catch (error) {
@@ -366,7 +367,7 @@ class ApplicationsService {
         'Error in ApplicationsService while deleting application:',
         error
       );
-      if(error.name === 'SequelizeForeignKeyConstraintError')
+      if (error.name === 'SequelizeForeignKeyConstraintError')
         throw new ConflictError();
       throw error;
     }
@@ -449,6 +450,183 @@ class ApplicationsService {
     } catch (error) {
       console.error(
         'Error in ApplicationsService while counting applications:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by company name for a specific user.
+   *
+   * @param {string} name - The company name of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the company name for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsByCompanyNameAndUser(name, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsByCompanyNameAndUser(
+          name,
+          userId
+        );
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by company name and user ID:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by position title for a specific user.
+   *
+   * @param {string} title - The position title of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the position title for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsByPositionTitleAndUser(title, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsByPositionTitleAndUser(
+          title,
+          userId
+        );
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by position title and user ID:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by status for a specific user.
+   *
+   * @param {string} status - The status of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the status for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsByStatusAndUser(status, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsByStatusAndUser(
+          status,
+          userId
+        );
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by status and user ID:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by deadline for a specific user.
+   *
+   * @param {string} deadline - The deadline date of the application ('YYYY-MM-DD').
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the deadline for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsByDeadlineAndUser(deadline, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsByDeadlineAndUser(
+          deadline,
+          userId
+        );
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by deadline and user ID:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by date for a specific user.
+   *
+   * @param {string} date - The date of the application ('YYYY-MM-DD').
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the date for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsByDateAndUser(date, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsByDateAndUser(date, userId);
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by date and user ID:',
+        error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves applications by source for a specific user.
+   *
+   * @param {string} source - The source of the application.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<Object[]>} A list of applications matching the source for the user.
+   * @throws {Error} If there's a database error.
+   */
+  static async getApplicationsBySourceAndUser(source, userId) {
+    try {
+      const user = await UsersRepository.getUserById(userId);
+      if (!user) {
+        throw new NotFound(`User with ID ${userId} not found.`);
+      }
+
+      const applications =
+        await ApplicationsRepository.getApplicationsBySourceAndUser(
+          source,
+          userId
+        );
+      return applications || [];
+    } catch (error) {
+      console.error(
+        'Error in ApplicationsService while fetching applications by source and user ID:',
         error
       );
       throw error;
