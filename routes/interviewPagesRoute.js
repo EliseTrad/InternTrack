@@ -34,30 +34,42 @@ function mapAndSortApplications(rawApps) {
  * @param {'asc'|'desc'} sortOrder - The order to sort the interviews ('asc' for ascending, 'desc' for descending).
  * @returns {Array<{id: number, date: string, interviewer: string, email: string, location: string, status: string, applicationId: number}>}
  */
-function mapAndSortInterviews(rawInterviews, sortOrder = 'asc') {
+function mapAndSortInterviews(rawInterviews, applications = [], sortOrder = 'asc') {
   const arr = Array.isArray(rawInterviews) ? rawInterviews : [rawInterviews];
 
-  // Map interviews to a view-friendly structure
-  const mapped = arr.map((interview) => ({
-    id: interview.interview_id,
-    date: interview.interview_date,
-    interviewer: interview.interviewer_name,
-    reminder: interview.reminder_sent,
-    email: interview.interviewer_email,
-    location: interview.location,
-    status: interview.interview_status,
-    applicationId: interview.application_id,
-  }));
-
-  // Sort interviews by interview_date
-  const sorted = mapped.sort((a, b) => {
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  const appMap = new Map();
+  applications.forEach(app => {
+    appMap.set(app.id, {
+      companyName: app.companyName,
+      positionTitle: app.positionTitle,
+    });
   });
 
-  return sorted;
+  const mapped = arr.map((interview) => {
+    const app = appMap.get(interview.application_id);
+    return {
+      id: interview.interview_id,
+      date: interview.interview_date,
+      interviewer: interview.interviewer_name,
+      reminder: interview.reminder_sent,
+      email: interview.interviewer_email,
+      location: interview.location,
+      status: interview.interview_status,
+      applicationId: interview.application_id,
+      companyName: app?.companyName || 'Unknown',
+      positionTitle: app?.positionTitle || 'Unknown',
+    };
+  });
+
+  if (sortOrder === 'asc') {
+    mapped.sort((a, b) => new Date(a.date) - new Date(b.date));
+  } else if (sortOrder === 'desc') {
+    mapped.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }
+
+  return mapped;
 }
+
 
 /**
  * @route   POST /interviews/create
@@ -226,7 +238,7 @@ router.get('/interviews', async (req, res) => {
     }
 
     // Map and sort interviews
-    interviews = mapAndSortInterviews(interviews);
+    interviews = mapAndSortInterviews(interviews, userApplications);
 
     // Pass all required data to the view
     res.render('interviews', {
@@ -352,7 +364,7 @@ router.get('/:id/update', async (req, res) => {
         )
       )
     );
-    const allInterviews = mapAndSortInterviews(interviewsPerApp.flat());
+    const allInterviews = mapAndSortInterviews(interviewsPerApp.flat(), userApplications);
 
     res.render('interviews', {
       error: null,
