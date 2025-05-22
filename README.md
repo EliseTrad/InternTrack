@@ -84,15 +84,15 @@ Interntracker helps users stay organized and never miss an opportunity during th
 
 ## 🌐 Main Screens & UX
 
-- **Landing Page:** Login and Registration with validation and error feedback.
-- **User Dashboard:** Choose to navigate between applications, cover-letters, resumes, interviews or edit-profile 
-                      pages.
+- **Landing Page:** Login and Registration with validation and error feedback. Admins can log in using credentials stored in the .env file. If an admin logs in, they are redirected to                       the admin dashboard. Normal users are redirected to the user dashboard.
+- **Admin Dashboard:** Displays a list of all users. Admin can delete any user or log in as the selected user (impersonation feature).
+- **User Dashboard:** Provides buttons to navigate between edit-profile, applications, resumes, cover-letters, and interviews pages.
 - **Application List:** Table of all applications with smart filters, search, and export option.
-- **Application Form:** Easily add/edit applications; select resumes/cover letters.
-- **Resume & Cover Letter Pages:** Upload, rename, delete, and search for your documents.
-- **Interview Scheduler:** Add, view, update, and search interviews (by status, date, location, etc.).
-- **Responsive EJS Views:** All pages are rendered with EJS templates and provide
-                            clear feedback on actions (success error messages).
+- **Edit Profile:** Allows users to update their name, email, password, and profile picture, or log out.
+- **Resume & Cover Letter Pages:** Upload, rename, delete, and search your documents.
+- **Application Page:** View all applications with total count, smart filters, and search. Add or update applications using an inline form on the same page. Delete any application.
+- **Interview Scheduler:** View all interviews with related application name and position title. Full CRUD operations available. Search and filter by status, date, location...
+- **Responsive EJS Views:** All pages are rendered using EJS templates. The interface is responsive and provides clear feedback on all actions (success, error, and validation messages).
 
 ---
 
