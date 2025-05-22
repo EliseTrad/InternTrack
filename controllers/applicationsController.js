@@ -518,8 +518,9 @@ class ApplicationsController {
    */
   static async exportApplicationsToExcel(req, res) {
     try {
-      // Get the user ID from the request parameters
-      const { userId } = req.params;
+      let userId = req.params.userId || req.session.user?.id;
+
+      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
       // Fetch all applications for the user
       const applications = await ApplicationsService.getApplicationsForUser(

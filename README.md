@@ -85,7 +85,8 @@ Interntracker helps users stay organized and never miss an opportunity during th
 ## 🌐 Main Screens & UX
 
 - **Landing Page:** Login and Registration with validation and error feedback.
-- **User Dashboard:** View application statistics and quick actions.
+- **User Dashboard:** Choose to navigate between applications, cover-letters, resumes, interviews or edit-profile 
+                      pages.
 - **Application List:** Table of all applications with smart filters, search, and export option.
 - **Application Form:** Easily add/edit applications; select resumes/cover letters.
 - **Resume & Cover Letter Pages:** Upload, rename, delete, and search for your documents.

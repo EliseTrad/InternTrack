@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ResumesService = require('../services/resumesService');
 const CoverLettersService = require('../services/coverlettersService');
+const ApplicationsController = require('../controllers/applicationsController');
 const {
   validateApplication,
   validationUpdate,
@@ -80,22 +81,22 @@ router.get('/applications', async (req, res) => {
   let error = null;
   let success = null;
   const currentFilters = {};
-  let formData = {}; // For the create form
+  let formData = {};
   let formError = null;
   let formSuccess = null;
-
-  // Initialize document arrays
   let resumes = [];
   let coverLetters = [];
+  let applicationCount = 0; 
 
   try {
     // Fetch resumes and cover letters for the form
-    const [rawResumes, rawCoverLetters] = await Promise.all([
+    const [rawResumes, rawCoverLetters, count] = await Promise.all([
       ResumesService.getResumesByUserId(userId),
       CoverLettersService.getCoverLettersByUserId(userId),
+      ApplicationsService.countApplicationsForUser(userId), 
     ]);
+    applicationCount = count;
 
-    // Map resumes and cover letters for the template
     resumes = rawResumes.map((r) => ({
       id: r.resume_id,
       name: r.resume_file_name,
@@ -158,7 +159,6 @@ router.get('/applications', async (req, res) => {
           }
         })
       );
-
       applications = mapAndSortApplications(computeIntersection(filterResults));
     } else {
       // Get all applications
@@ -166,7 +166,6 @@ router.get('/applications', async (req, res) => {
       applications = mapAndSortApplications(rawData);
     }
 
-    // Enrich applications with resume and cover letter names
     applications = await Promise.all(
       applications.map(async (app) => {
         const resume = app.resumeId
@@ -198,10 +197,12 @@ router.get('/applications', async (req, res) => {
 
     // Attempt to fetch all applications in case of filtering errors
     try {
+      // Fallback: fetch count even if main try fails
+      applicationCount = await ApplicationsService.countApplicationsForUser(userId);
+
       const rawData = await ApplicationsService.getApplicationsForUser(userId);
       applications = mapAndSortApplications(rawData);
 
-      // Enrich applications with resume and cover letter names
       applications = await Promise.all(
         applications.map(async (app) => {
           const resume = app.resumeId
@@ -219,11 +220,9 @@ router.get('/applications', async (req, res) => {
         })
       );
     } catch (fallbackErr) {
-      console.error(
-        'Error during fallback loading of applications:',
-        fallbackErr
-      );
+      console.error('Error during fallback loading of applications:', fallbackErr);
       applications = [];
+      applicationCount = 0; // <-- always assign something
       error = 'Failed to load applications. Please contact support.';
     }
   }
@@ -236,12 +235,13 @@ router.get('/applications', async (req, res) => {
     filters: currentFilters,
     resumes,
     coverLetters,
-    mode: 'create', // Default to "create" mode
-    formData: {}, // Empty form data for new application
-    formError: null, // No form error by default
-    formSuccess: null, // No form success by default
-    formAction: '/applicationPage/create', // Default to the "create" action
-    formButtonText: 'Submit', // Default button text
+    applicationCount, 
+    mode: 'create',
+    formData: {},
+    formError: null,
+    formSuccess: null,
+    formAction: '/applicationPage/create',
+    formButtonText: 'Submit',
   });
 });
 
@@ -558,6 +558,17 @@ router.get('/:id/update', async (req, res) => {
     console.error('Error fetching application for edit:', err);
     res.redirect('/applicationPage/applications');
   }
+});
+
+/**
+ * @route   GET /export
+ * @desc    Export all applications for the logged-in user as an Excel file
+ * @access  Private
+ * @returns {ExcelFile} - Sends an Excel file as a response
+ */
+router.get('/export', async (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  return ApplicationsController.exportApplicationsToExcel(req, res);
 });
 
 module.exports = router;
