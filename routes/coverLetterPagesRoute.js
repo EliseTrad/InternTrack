@@ -4,8 +4,8 @@ const CoverLettersService = require('../services/coverlettersService');
 const uploadCoverLetter = require('../middleware/uploadCover');
 
 /**
- * Helper to map raw cover letter records to view-friendly objects and sort by uploadDate descending.
- * @param {Object|Object[]} rawLetters - Single cover letter object or array from DB
+ * Maps raw cover letter records to view-friendly objects and sorts by upload date descending.
+ * @param {Object|Object[]} rawLetters - Single cover letter object or array from DB.
  * @returns {Array<{id: number, name: string, path: string, uploadDate: string}>}
  */
 function mapAndSortCoverLetters(rawLetters) {

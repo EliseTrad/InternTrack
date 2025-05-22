@@ -7,6 +7,11 @@ const {
   validateInterview,
 } = require('../validators/interviewsDTO');
 
+/**
+ * Helper to map raw application records to view-friendly objects and sort by applicationDate descending.
+ * @param {Object|Object[]} rawApps - Single application object or array from DB.
+ * @returns {Array<{id: number, companyName: string, positionTitle: string, applicationDate: string, status: string, deadline: string, source: string, notes: string, resumeId: number, coverLetterId: number}>}
+ */
 function mapAndSortApplications(rawApps) {
   const arr = Array.isArray(rawApps) ? rawApps : [rawApps];
 
@@ -28,17 +33,23 @@ function mapAndSortApplications(rawApps) {
     (a, b) => new Date(b.applicationDate) - new Date(a.applicationDate)
   );
 }
+
 /**
- * Helper to map raw interview records to view-friendly objects and sort by interview_date.
+ * Maps raw interview records to view-friendly objects, merging application data, and sorts by interview date.
  * @param {Object|Object[]} rawInterviews - Single interview object or array from DB.
- * @param {'asc'|'desc'} sortOrder - The order to sort the interviews ('asc' for ascending, 'desc' for descending).
- * @returns {Array<{id: number, date: string, interviewer: string, email: string, location: string, status: string, applicationId: number}>}
+ * @param {Array<Object>} [applications=[]] - Array of application objects used to enrich interview data.
+ * @param {'asc'|'desc'} [sortOrder='asc'] - Sort order for interviews by date.
+ * @returns {Array<{id: number, date: string, interviewer: string, reminder: boolean, email: string, location: string, status: string, applicationId: number, companyName: string, positionTitle: string}>}
  */
-function mapAndSortInterviews(rawInterviews, applications = [], sortOrder = 'asc') {
+function mapAndSortInterviews(
+  rawInterviews,
+  applications = [],
+  sortOrder = 'asc'
+) {
   const arr = Array.isArray(rawInterviews) ? rawInterviews : [rawInterviews];
 
   const appMap = new Map();
-  applications.forEach(app => {
+  applications.forEach((app) => {
     appMap.set(app.id, {
       companyName: app.companyName,
       positionTitle: app.positionTitle,
@@ -69,7 +80,6 @@ function mapAndSortInterviews(rawInterviews, applications = [], sortOrder = 'asc
 
   return mapped;
 }
-
 
 /**
  * @route   POST /interviews/create
@@ -364,7 +374,10 @@ router.get('/:id/update', async (req, res) => {
         )
       )
     );
-    const allInterviews = mapAndSortInterviews(interviewsPerApp.flat(), userApplications);
+    const allInterviews = mapAndSortInterviews(
+      interviewsPerApp.flat(),
+      userApplications
+    );
 
     res.render('interviews', {
       error: null,

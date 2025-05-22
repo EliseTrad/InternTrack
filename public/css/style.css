@@ -1,3 +1,11 @@
+/* 
+  Global Stylesheet
+
+  This file contains the primary CSS rules for the application's UI, 
+  including body, navbar, forms, buttons, alerts, footer, and profile picture styles.
+  All rules are tuned for a dark-themed interface with blue highlights.
+*/
+
 /* Global body styling */
 body {
   background-color: #011222; /* Consistent dark blue background */
@@ -84,6 +92,7 @@ footer p {
   color: #6c757d;
 }
 
+/* Profile Picture Styles */
 .profile-pic-wrapper {
   position: relative;
   width: 100px;
@@ -109,11 +118,13 @@ footer p {
   border: 1px solid #ccc;
 }
 
+/* Custom Bootstrap override for light backgrounds */
 .bg-light {
   --bs-bg-opacity: 1;
   background-color: #011222 !important;
 }
 
+/* Hide password change fields by default */
 #change-password-fields {
   display: none;
 }

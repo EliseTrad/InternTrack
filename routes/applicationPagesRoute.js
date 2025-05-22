@@ -10,10 +10,11 @@ const {
 const ApplicationsService = require('../services/applicationsService');
 
 /**
- * Helper to map raw application records to view-friendly objects and sort by application_date descending
- * @param {Object|Object[]} rawApps - Single application object or array from DB
- * @returns {Array<{id: number, companyName: string, positionTitle: string, applicationDate:
- *          string, status: string, deadline: string|null, source: string}>}
+ * Maps raw application records to view-friendly objects and sorts by application date descending.
+ * @param {Object|Object[]} rawApps - Single application object or array from DB.
+ * @returns {Array<{id: number, companyName: string, positionTitle: string, 
+ * applicationDate: string, status: string, deadline: string|null, source: string, 
+ * notes: string, resumeId: number, coverLetterId: number}>}
  */
 function mapAndSortApplications(rawApps) {
   const arr = Array.isArray(rawApps) ? rawApps : [rawApps];
@@ -38,9 +39,9 @@ function mapAndSortApplications(rawApps) {
 }
 
 /**
- * Finds applications that appear in all filter result arrays
- * @param {Array[]} filterResults - Array of application arrays from each filter
- * @returns {Object[]} Applications that match all filters
+ * Finds applications that appear in all filter result arrays.
+ * @param {Array<Object[]>} filterResults - Array of application arrays from each filter.
+ * @returns {Object[]} Applications that match all filters.
  */
 function computeIntersection(filterResults) {
   if (filterResults.length === 0) return [];
@@ -245,8 +246,8 @@ router.get('/applications', async (req, res) => {
 });
 
 /**
- * @route   GET /applications/new
- * @desc    Display form to create a new application with document selection
+ * @route   POST /create
+ * @desc    Create a new application
  * @access  Private
  */
 router.post(
@@ -463,7 +464,7 @@ router.post('/delete', async (req, res) => {
 });
 
 /**
- * @route   POST /applications/:id/update
+ * @route   POST /applicationPage/:id/update
  * @desc    Update an application
  * @access  Private
  * @param   {string} req.params.id - Application ID
@@ -509,6 +510,12 @@ router.post('/:id/update', validationUpdate, async (req, res) => {
   }
 });
 
+/**
+ * @route   GET /applicationPage/:id/update
+ * @desc    Render the form to edit an existing application
+ * @access  Private
+ * @param   {string} req.params.id - Application ID
+ */
 router.get('/:id/update', async (req, res) => {
   const appId = parseInt(req.params.id, 10);
   const userId = req.session.user?.id;
